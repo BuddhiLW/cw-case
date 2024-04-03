@@ -204,21 +204,176 @@ func (lines GameLines) Kills(players *p.Players) {
 }
 #+end_src
 * =Game=, =Player= and =Encoding= Abstraction
-*** Tree view
+** Tree view
 #+ATTR_HTML: :width 600px
 [[file:img/cw-tree-game-player.png]]
+** Logic (=types=)
+*** Game
+#+begin_src go
+type Game struct {
+	Players player.Players
+}
+#+end_src
+*** Player
+#+begin_src go
+type Player struct {
+	Name    string  `json:"name"`
+	Kills   int     `json:"kills"`
+	Victims Victims `json:"victims"`
+}
 
-* Languages I speak 
+type Players map[string]*Player
+type Victims map[string]Ways
+type Ways map[string]int
+#+end_src
+
+*** Encoded Game (easy outputting)
+#+begin_src go
+type EncodeGame struct {
+	TotalKills int      `json:"total_kills"`
+	Players    []string `json:"players"`
+	Kills      Kills    `json:"kills"`
+}
+
+type Kills map[string]Kill
+#+end_src
+*** Ranking
+
+#+begin_src go
+type Rank struct {
+	Name     Name `json:"name"`
+	Kills    int  `json:"kills"`
+	Position int  `json:"position"`
+}
+
+type GameRank map[Name]*Rank
+#+end_src
+** Methods
+*** "=Encoding="
+Consider the /boundary rules/ or /business logic/ for *Report* functionality.
+
+#+begin_src go
+// Boundary rules for the game
+// 1. If the killer is "<world>", the kill is subtracted from the victim
+// 2. All kills by "<world>" are added to the total kills, normally
+// 3. "<world>" must not be listed as a player
+
+func (g *Game) NewEncodeGame() *EncodeGame {
+	totalKills := 0
+	killMap := Kills{}
+	playerNames := make([]string, 0, len(g.Players)-1)
+
+	for name, p := range g.Players {
+		if name == "<world>" {
+			// Conform to the counting rules 2 and 3.
+			// -------------------------------------------
+			totalKills += p.Kills
+		} else {
+			// Add player to the list of players
+			playerNames = append(playerNames, name)
+
+			totalKills += p.Kills
+
+			// Conform to the counting rule 1.
+			// -------------------------------------------
+			// Consider <world> kills into the calculation
+			// of the player's kills (score)
+			killMap[name] = g.countKills(name)
+		}
+	}
+
+	return &EncodeGame{
+		TotalKills: totalKills,
+		Players:    playerNames,
+		Kills:      killMap,
+	}
+}
+#+end_src
+*** Count player's kills
+#+begin_src go
+func (g *Game) countKills(name string) Kill {
+	// Get the kills from the player
+	kills := g.Players[name].Kills
+
+	// Remove the kills from the world
+	killWorld := g.Players["<world>"].Victims[name].CountKills()
+
+	// Calculate the kills
+	return Kill(kills - killWorld)
+}
+#+end_src
+*** Rank Players, by Kill Count
+
+#+begin_src go
+func (g *EncodeGame) RankPlayersByKills() (*GameRank, []*Rank) {
+	gameRank := NewGameRank()
+	scoreList := make([]*Rank, 0, len(g.Kills))
+
+	for playerName, kill := range g.Kills {
+		rank := NewRank()
+		*rank = Rank{Name: Name(playerName), Kills: int(kill)}
+		scoreList = append(scoreList, rank)
+	}
+
+	sort.Slice(scoreList, func(i, j int) bool {
+		return scoreList[i].Kills > scoreList[j].Kills // Descending order
+	})
+
+	for i, rank := range scoreList {
+		rank.Position = i + 1
+		(*gameRank)[rank.Name] = rank
+	}
+
+	return gameRank, scoreList
+}
+#+end_src
+
+*** Count the total kills of a given type
+
+#+begin_src go
+func (g *Game) CountTypeKills() p.Ways {
+	ways := p.NewWays()
+
+	// Count the kills for each kill-mode, in the game
+	for _, p := range g.Players {
+		for _, way := range p.Victims {
+			for mode, kills := range way {
+				if ways.HasMode(mode) {
+					(*ways)[mode] += kills
+				} else {
+					(*ways)[mode] = kills
+				}
+			}
+		}
+	}
+	return *ways
+}
+#+end_src
+* =Output= and formatting
+=/game/output.go=
+
+** Formatting
+#+begin_src go
+func PrettyString(str string) (string, error) {
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, []byte(str), "", "    "); err != nil {
+		return "", err
+	}
+	return prettyJSON.String(), nil
+}
+#+end_src
+* About me...
+** Languages I speak 
 #+ATTR_REVEAL: :frag (appear)
 - Portuguese 🇧🇷 -- Native
 - English 🇺🇸    -- C2    (Maximum-range score)
 - Russian 🇷🇺    -- Basic (currently learning)
 - Mandarin 🇨🇳   -- Basic (currently learning)
 
-* Jobs
-** FACTI - Campinas, SP
+** Jobs
+*** FACTI - Campinas, SP
 =Fundação de Apoio à Capacitação de Tecnologia da Informação=
-*** Help desk app (a week)
+**** Help desk app (a week)
 :PROPERTIES:
 :reveal_background_iframe: https://buddhilw.github.io/support-app/
 :reveal_background: rgb(250,250,250)
@@ -227,24 +382,24 @@ func (lines GameLines) Kills(players *p.Players) {
 :reveal_data_state: title__alien--state
 :html_container_class: title__alien--class
 :END:
-*** Fast PDFs with a lot of banking data
+**** Fast PDFs with a lot of banking data
 
-** Café do Bem (NPO)
+*** Café do Bem (NPO)
 #+ATTR_REVEAL: :frag (appear)
 - High quality coffee.
 - The gains returns to coffee producers.
 - Resilience for the coffee community.
 - https://cafe-do-bem.company.site/
 
-*** The website
+**** The website
 #+ATTR_HTML: :width 1200px
 [[file:img/cafe-do-bem.png][file:img/cafe-do-bem.png]]
-** As a Contractor
-*** Advanced statistical analysis of Bidding prices
-***** Grouping in Categories
+*** As a Contractor
+**** Advanced statistical analysis of Bidding prices
+****** Grouping in Categories
 #+ATTR_HTML: :width 1200px
 [[file:img/rplot.png][file:img/rplot.png]]
-*** Data converter XML to CSV
+**** Data converter XML to CSV
 #+begin_src xml
 <?xml version='1.0' encoding='utf-8'?>
 <ns3:Servico>
@@ -267,13 +422,13 @@ func (lines GameLines) Kills(players *p.Players) {
   3516200</ns3:MunicipioPrestacaoServico>
 </ns3:Servico>
 #+end_src
-*** Data converter XML to CSV
+**** Data converter XML to CSV
 - 2409 instances of data.
 #+begin_src csv
 Date, Prestador, RazaoSocial, CPF, Tributos, ValorServico
 2018-01-05T10:32:20, FUNERARIA FRANCANA LTDA, RITA APARECIDA PEREIRA DA SILVA, 19636387869, 456.48, 3600.0
 #+end_src
-*** Data converter XML to CSV
+**** Data converter XML to CSV
 
 #+begin_src clojure :eval no
 (defn ->row-csv
@@ -293,7 +448,7 @@ Date, Prestador, RazaoSocial, CPF, Tributos, ValorServico
         (str "\n"))))
 #+end_src
 
-*** Data converter XML to CSV
+**** Data converter XML to CSV
 #+begin_src clojure :eval no
 (defn tributos [data]
   (-> (->> data
@@ -307,29 +462,29 @@ Date, Prestador, RazaoSocial, CPF, Tributos, ValorServico
       first
       parse-trib-val))
 #+end_src
-*** Data converter XML to CSV
+**** Data converter XML to CSV
 #+begin_src clojure :eval no :exports both
 (h/tributos (first data))
 #+end_src
 #+RESULT:
 : => 456.48
 
-*** Analysis of Growth
+**** Analysis of Growth
 #+ATTR_HTML: :width 1000px
 [[file:img/Arrecadamento.png]]
-*** Analysis of =Tax= and =Revenues=
+**** Analysis of =Tax= and =Revenues=
 #+ATTR_HTML: :width 1000px
 [[file:img/Dist-serv.png]]
 
-*** Analysis of =Tax= and =Revenues=
+**** Analysis of =Tax= and =Revenues=
 #+ATTR_HTML: :width 1000px
 [[file:img/Serv-z.png]]
 
-*** Analysis of =Tax= and =Revenues=
+**** Analysis of =Tax= and =Revenues=
 #+ATTR_HTML: :width 1000px
 [[file:img/Dist-trib.png]]
 
-*** Find and explain abnormalities in =Revenue=
+**** Find and explain abnormalities in =Revenue=
 #+begin_src julia :exports both :eval no
 subset(df_mmz, :Serv_z => ByRow(<(-1.5)))
 #+end_src
@@ -349,13 +504,13 @@ subset(df_mmz, :Serv_z => ByRow(<(-1.5)))
    8 │ (2019, 6)           9095.84           69021.4     18  -2.10034  -2.35555
 #+end_example
 
-*** Correlation between =Tax= and =Income=
+**** Correlation between =Tax= and =Income=
 #+begin_src julia :exports both :eval no
 cor(df_mm.Tributos_sum, df_mm.ValorServico_sum)
 #+end_src
 #+RESULTS:
 : 89.12%
-*** Hypothesis test data on equal variation
+**** Hypothesis test data on equal variation
 - Julia interoperation with R.
 #+begin_src julia :exports both :eval no
 trib_z = df_mmz.Trib_z
@@ -371,14 +526,14 @@ data:  `#JL`$trib_z and `#JL`$val_serv_z
 F = 1, num df = 56, denom df = 56, p-value = 1
 #+end_example
 
-** Flow Finance
+*** Flow Finance
 #+ATTR_REVEAL: :frag (appear)
 - Clarence and Leadger
 - Automate billing
 - APIs and Routing
 - Clojure(Script)
 - Code: https://github.com/BuddhiLW/commons-csv-clj
-*** Example
+**** Example
 #+begin_src clojure :eval no
 (defn cnpj#
   "take a =CNPJ-value= and narrow down to the subclass which has this CNPJ"
@@ -389,23 +544,23 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 #+begin_src clojure :eval no
 (cnpj# "17194123000103" vec-revenues)
 #+end_src
-*** Literate documentation
+**** Literate documentation
 #+ATTR_HTML: :width 1200px
 [[file:img/FlowFinance.png][file:img/FlowFinance.png]]
-** Lupo S.A.
+*** Lupo S.A.
 #+ATTR_REVEAL: :frag (appear)
 - Technical Report Automation.
 - Inventory of 300+ machines.
 - Used Clojure (not best choice).
 - Code: https://github.com/BuddhiLW/CloshBashika
-*** Example
+**** Example
 #+ATTR_HTML: :width 1200px
 [[file:img/lupo.jpg][file:img/lupo.jpg]]
-*** Freelance with a group of Safety Engineers
+**** Freelance with a group of Safety Engineers
 #+ATTR_HTML: :width 1000px
 [[file:img/lupo2.jpeg]]
-* Projects
-** HTML/CSS -- Instagram Replica
+** Projects
+*** HTML/CSS -- Instagram Replica
 :PROPERTIES:
 :reveal_background_iframe: https://buddhilw.github.io/Instagram-replica/
 :reveal_background: rgb(250,250,250)
@@ -413,7 +568,7 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 :reveal_background_opacity: 0.90
 :html_container_class: title__cards
 :END:
-** JS/Elm -- Matching Cards game
+*** JS/Elm -- Matching Cards game
 :PROPERTIES:
 :reveal_background_iframe: https://buddhilw.github.io/MatchingCards/
 :reveal_background: rgb(250,250,250)
@@ -421,7 +576,7 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 :reveal_background_opacity: 0.90
 :html_container_class: title__cards
 :END:
-** Clojure(Script) -- Personal Website
+*** Clojure(Script) -- Personal Website
 :PROPERTIES:
 :reveal_background_iframe: https://www.buddhilw.com/
 :reveal_background: rgb(250,250,250)
@@ -430,13 +585,13 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 :html_container_class: title__cards
 :END:
 
-** Clojure(Script) -- Giggin
+*** Clojure(Script) -- Giggin
 - Not yet deployed.
 - Shopping site.
 
 #+ATTR_HTML: :width 600px
 [[file:img/img-giggin.png][file:./img/img-giggin.png]]
-** Clojure(Script) -- Certifications Portfolio
+*** Clojure(Script) -- Certifications Portfolio
 :PROPERTIES:
 :reveal_background_iframe: https://buddhilw.github.io/bug-free-fiesta/
 :reveal_background: rgb(250,250,250)
@@ -445,8 +600,8 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 :html_container_class: title__cards
 :END:
 
-** System's functionalities
-*** Pomodoro -- Go/Bash
+*** System's functionalities
+**** Pomodoro -- Go/Bash
 - Self-management.
 - Data collection.
 - Statistics about yourself.
@@ -454,7 +609,7 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 #+ATTR_HTML: :width 500px
 [[file:img/pomo.png][file:./img/pomo.png]]
 
-*** Note-taking (Diary) -- Elisp/Emacs
+**** Note-taking (Diary) -- Elisp/Emacs
 - Take notes, whitout the need to thing too much.
 - Bind it to three key-strokes.
 
@@ -469,18 +624,18 @@ F = 1, num df = 56, denom df = 56, p-value = 1
           (find-file (lw/diary-day-entry)))
     (find-file (lw/diary-day-entry))))
 #+end_src
-*** Note-taking (Diary) -- Elisp/Emacs
+**** Note-taking (Diary) -- Elisp/Emacs
 #+ATTR_HTML: :width 600px
 [[file:img/diary.png][file:./img/diary.png]]
-** Trading Bot
+*** Trading Bot
 Code (FOSS):
 - https://github.com/freqtrade/freqtrade
 - https://github.com/BuddhiLW/studious-carnival 
 - https://github.com/BuddhiLW/FreqTrade-backtesting
 
-** API Integration to Stark Bank
+*** API Integration to Stark Bank
 - Access: https://github.com/BuddhiLW/stark-challenge
-*** Main tasks - Invoice generation
+**** Main tasks - Invoice generation
 Generate =Invoice= payment bills.
 #+begin_src clojure :eval no
 (invoice/create [(help/gen-invoice-map
@@ -493,12 +648,12 @@ Generate =Invoice= payment bills.
                   (help/r-interest)
                   help/descr-ex)])
 #+end_src
-*** Server-side Webhook responses
+**** Server-side Webhook responses
 - Deal with =POST= requests, from Webhook.
 - Responses from Invoice Generation
 #+ATTR_HTML: :width 600px
 [[file:img/request-bin.png][file:img/request-bin.png]]
-** Application walkthrough
+*** Application walkthrough
 :PROPERTIES:
 :reveal_background_iframe: https://www.youtube.com/channel/UCcDTD0VMlN2tGA7sDVZllRw
 :reveal_background: rgb(250,250,250)
