@@ -1,0 +1,510 @@
+:REVEAL_PROPERTIES:
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+#+REVEAL_REVEAL_JS_VERSION: 4
+# #+REVEAL_THEME: sky
+#+REVEAL_EXTRA_CSS: ./css/blood.css
+#+REVEAL_EXTRA_CSS: ./css/fonts.css
+#+REVEAL_EXTERNAL_PLUGINS: (spotlight "js/spotlight.js" "plugin/spotlight.js")
+#+REVEAL_EXTRA_SCRIPT_SRC: ./js/caption.js
+#+REVEAL_EXTRA_SCRIPT_SRC: ./js/style.js
+#+REVEAL_PLUGINS: (highlight)
+#+REVEAL_HIGHLIGHT_CSS: https://cdn.jsdelivr.net/npm/reveal.js@4.2.0/plugin/highlight/monokai.css
+#+OPTIONS: reveal_global_footer:t
+#+OPTIONS: timestamp:nil toc:2 num:nil
+:END:
+
+#+title: Case: Quake Report
+#+AUTHOR: Pedro G. Branquinho
+#+OPTIONS: toc:nil
+
+* Entry point
+=/cmd/qrep/main.go=
+** Tree view
+#+ATTR_HTML: :width 600px
+[[file:img/cw-entry-point.png]]
+** Code
+#+begin_src go
+package main
+
+import report "github.com/BuddhiLW/cloud-walk-techtest/report"
+
+// tree grown from branch
+func main() { report.Cmd.Run() }
+#+end_src
+
+* =report= Command
+A *Bonzai-branch* command
+** Tree view
+#+ATTR_HTML: :width 600px
+[[file:img/cw-tree-report-cli.png]]
+
+** Structure =Z.Cmd= (Main branch)
+Metadata and Commands
+
+#+begin_src go
+var Cmd = &Z.Cmd{
+	Name:      `qrep`,
+
+	// (...) Meta-data
+	// Summary:   `Quake Report: A Bonzai composite command tree, for generating Reports for Cloud Walk technical test`,
+
+	Commands: []*Z.Cmd{
+		// standard external branch imports (see rwxrob/{help,conf,vars})
+		help.Cmd, conf.Cmd, vars.Cmd,
+
+		// local commands (in this module)
+		ReportCmd,
+	},
+
+	// More meta-data
+	Description: `(...)`,
+}
+#+end_src
+** Structure =Z.Cmd= (Leaf)
+#+begin_src go
+var ReportCmd = &Z.Cmd{
+	Name:     `report`,
+	Aliases:  []string{`data`},
+	Usage:    `<number>`,
+	Summary:  `*data*, or *report*, is the root of the quake-report binary-tree.`,
+	NumArgs:  0,
+	Commands: []*Z.Cmd{help.Cmd, RankCmd, StatisticsCmd},
+	//
+	Call: func(_ *Z.Cmd, args ...string) error {
+		// Terminal-client interface logic
+	},
+}
+#+end_src
+** =Call= (Cli-interface programming)
+#+begin_src go
+Call: func(_ *Z.Cmd, args ...string) error {
+	// Terminal client interface logic
+	if len(args) == 0 {
+		log.Print("Displaying all matches, in JSON format")
+		g.GameOutput()
+		return nil
+	} else {
+		log.Print("Match chosen: ", args[0])
+		// Parse as int
+		n, err := strconv.Atoi(args[0])
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if n >= 1 {
+			_ = g.GameOutput(n)
+		} else {
+			log.Fatal("Invalid Match number. Must be greater or equal to 1.")
+		}
+		return nil
+	}
+}
+#+end_src
+* Data *fetching* and *parsing*
+** Tree view
+#+ATTR_HTML: :width 600px
+[[file:img/cw-tree-data-extraction.png]]
+** Data fetch (=client.go=)
+*** Gist
+#+begin_src go
+func (g Gist) ReadGist() RawData {
+	resp, err := http.Get(g.url())
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	var rawData RawData = RawData(body)
+	return rawData
+}
+
+#+end_src
+*** Local file (for =tests=)
+#+begin_src go
+func (path Path) ReadFile() RawData {
+	content, err := os.ReadFile(path.String())
+	if err != nil {
+		panic(err)
+	}
+
+	return RawData(content)
+}
+#+end_src
+** Data Parsing (=conversions.go=)
+*** =RawData= to =RawGames=
+#+begin_src go
+func (r RawData) ToGames() RawGames {
+	dataBySplit := RawGames{}
+	splits := strings.Split(r.String(), "------------------------------------------------------------")
+
+	for _, v := range splits {
+		// has regex =InitGame:= or not -- determine if it's a game
+		if strings.Contains(v, "InitGame:") {
+			dataBySplit[gameCount] = RawGame(v)
+		}
+	}
+	return dataBySplit
+}
+#+end_src
+
+*** =RawGame= to =Lines=
+#+begin_src go
+func (rg RawGame) ToLines() []Line {
+	var lines []Line
+	for _, v := range strings.Split(rg.String(), "\n") {
+		line := Line(v)
+		lines = append(lines, line)
+	}
+	return lines
+}
+#+end_src
+** Data Extraction (=extraction.go=)
+*** Create the list of =players=
+Given a parsed =game= data, extract the players of that match.
+
+#+begin_src go
+func (lines GameLines) Players() *p.Players {
+	players := p.NewPlayers() // map[string]p.Player{}
+
+	// Extract players from the lines
+	for _, v := range lines {
+		if v.HasPlayer() {
+			playerName := v.ExtractPlayer()
+			if !containPlayer(players, playerName) {
+				player := p.NewPlayer(playerName)
+				players.AddPlayer(player)
+			}
+		}
+	}
+
+	return players
+}
+#+end_src
+
+*** Count =kills= (mutate =players= struct)
+
+#+begin_src go
+func (lines GameLines) Kills(players *p.Players) {
+	for _, v := range lines {
+		if v.HasKill() {
+			killer, killed, action := v.ExtractAction() // killer, killed, action
+			player := (*players)[killer.String()]
+			player.AddKill(killed.String(), action.String())
+		}
+	}
+
+	// Count total kills, for each player
+	for _, p := range *players {
+		p.Kills = p.Victims.CountKills()
+	}
+}
+#+end_src
+* =Game=, =Player= and =Encoding= Abstraction
+*** Tree view
+#+ATTR_HTML: :width 600px
+[[file:img/cw-tree-game-player.png]]
+
+* Languages I speak 
+#+ATTR_REVEAL: :frag (appear)
+- Portuguese 🇧🇷 -- Native
+- English 🇺🇸    -- C2    (Maximum-range score)
+- Russian 🇷🇺    -- Basic (currently learning)
+- Mandarin 🇨🇳   -- Basic (currently learning)
+
+* Jobs
+** FACTI - Campinas, SP
+=Fundação de Apoio à Capacitação de Tecnologia da Informação=
+*** Help desk app (a week)
+:PROPERTIES:
+:reveal_background_iframe: https://buddhilw.github.io/support-app/
+:reveal_background: rgb(250,250,250)
+:reveal_foreground: rgb(100,0,100)
+:reveal_background_opacity: 0.90
+:reveal_data_state: title__alien--state
+:html_container_class: title__alien--class
+:END:
+*** Fast PDFs with a lot of banking data
+
+** Café do Bem (NPO)
+#+ATTR_REVEAL: :frag (appear)
+- High quality coffee.
+- The gains returns to coffee producers.
+- Resilience for the coffee community.
+- https://cafe-do-bem.company.site/
+
+*** The website
+#+ATTR_HTML: :width 1200px
+[[file:img/cafe-do-bem.png][file:img/cafe-do-bem.png]]
+** As a Contractor
+*** Advanced statistical analysis of Bidding prices
+***** Grouping in Categories
+#+ATTR_HTML: :width 1200px
+[[file:img/rplot.png][file:img/rplot.png]]
+*** Data converter XML to CSV
+#+begin_src xml
+<?xml version='1.0' encoding='utf-8'?>
+<ns3:Servico>
+  <ns3:Valores>
+    <ns3:ValorServicos>102349.00</ns3:ValorServicos>
+    <ns3:IssRetido>2</ns3:IssRetido>
+    <ns3:ValorIss>0.00</ns3:ValorIss>
+    <ns3:BaseCalculo>102349.00</ns3:BaseCalculo>
+    <ns3:Aliquota>0.0425</ns3:Aliquota>
+    <ns3:ValorLiquidoNfse>102349.00</ns3:ValorLiquidoNfse>
+    <ns3:ValorIssRetido>0</ns3:ValorIssRetido>
+  </ns3:Valores>
+  <ns3:ItemListaServico>2501</ns3:ItemListaServico>
+  <ns3:CodigoTributacaoMunicipio>
+  960330400</ns3:CodigoTributacaoMunicipio>
+  <ns3:Discriminacao>- PLANOS FUNERÁRIOS RECEBIDOS EM MARÇO -
+  R$ 102.349,00 - VALOR APROXIMADO DOS TRIBUTOS - R$
+  13.366,78</ns3:Discriminacao>
+  <ns3:MunicipioPrestacaoServico>
+  3516200</ns3:MunicipioPrestacaoServico>
+</ns3:Servico>
+#+end_src
+*** Data converter XML to CSV
+- 2409 instances of data.
+#+begin_src csv
+Date, Prestador, RazaoSocial, CPF, Tributos, ValorServico
+2018-01-05T10:32:20, FUNERARIA FRANCANA LTDA, RITA APARECIDA PEREIRA DA SILVA, 19636387869, 456.48, 3600.0
+#+end_src
+*** Data converter XML to CSV
+
+#+begin_src clojure :eval no
+(defn ->row-csv
+  "razão-social, cpf, prestador, tributos, valor-seviço"
+  [data]
+  (let [date (h/date data)
+        rs (h/tomador-razao-social data)
+        cpf (tomador-cpf data)
+        prest (prestador data)
+        trib (str (tributos data))
+        valor-servico (str (val-serv data))]
+    (-> (->> [date prest rs cpf trib valor-servico]
+             (interpose ", ")
+             (apply str))
+        (clojure.string/replace "\n" "")
+        (clojure.string/replace #"\s+" " ")
+        (str "\n"))))
+#+end_src
+
+*** Data converter XML to CSV
+#+begin_src clojure :eval no
+(defn tributos [data]
+  (-> (->> data
+           :content
+           (filter #(= (:tag %) :Servico))
+           first
+           :content
+           (filter #(= (:tag %) :Discriminacao))
+           first)
+      :content
+      first
+      parse-trib-val))
+#+end_src
+*** Data converter XML to CSV
+#+begin_src clojure :eval no :exports both
+(h/tributos (first data))
+#+end_src
+#+RESULT:
+: => 456.48
+
+*** Analysis of Growth
+#+ATTR_HTML: :width 1000px
+[[file:img/Arrecadamento.png]]
+*** Analysis of =Tax= and =Revenues=
+#+ATTR_HTML: :width 1000px
+[[file:img/Dist-serv.png]]
+
+*** Analysis of =Tax= and =Revenues=
+#+ATTR_HTML: :width 1000px
+[[file:img/Serv-z.png]]
+
+*** Analysis of =Tax= and =Revenues=
+#+ATTR_HTML: :width 1000px
+[[file:img/Dist-trib.png]]
+
+*** Find and explain abnormalities in =Revenue=
+#+begin_src julia :exports both :eval no
+subset(df_mmz, :Serv_z => ByRow(<(-1.5)))
+#+end_src
+#+RESULTS:
+#+begin_example
+8×6 DataFrame
+ Row │ Data_function  Tributos_sum  ValorServico_sum  id     Trib_z    Serv_z
+     │ Tuple…         Float64       Float64           Int64  Float64   Float64
+─────┼──────────────────────────────────────────────────────────────────────────
+   1 │ (2018, 5)          11417.4            83590.0      5  -1.67904  -1.90722
+   2 │ (2018, 7)          13226.0            96458.0      7  -1.35084  -1.51121
+   3 │ (2018, 8)          12309.0            89650.0      8  -1.51725  -1.72072
+   4 │ (2018, 9)          10813.5            80870.0      9  -1.78863  -1.99092
+   5 │ (2018, 10)         11929.1            86760.0     10  -1.58619  -1.80966
+   6 │ (2018, 11)         11754.4            86400.0     11  -1.61789  -1.82074
+   7 │ (2018, 12)         11934.2            89160.0     12  -1.58526  -1.7358
+   8 │ (2019, 6)           9095.84           69021.4     18  -2.10034  -2.35555
+#+end_example
+
+*** Correlation between =Tax= and =Income=
+#+begin_src julia :exports both :eval no
+cor(df_mm.Tributos_sum, df_mm.ValorServico_sum)
+#+end_src
+#+RESULTS:
+: 89.12%
+*** Hypothesis test data on equal variation
+- Julia interoperation with R.
+#+begin_src julia :exports both :eval no
+trib_z = df_mmz.Trib_z
+val_serv_z = df_mmz.Serv_z
+R"var.test($trib_z, y = $val_serv_z)"
+#+end_src
+
+#+RESULTS:
+#+begin_example
+        F test to compare two variances
+
+data:  `#JL`$trib_z and `#JL`$val_serv_z
+F = 1, num df = 56, denom df = 56, p-value = 1
+#+end_example
+
+** Flow Finance
+#+ATTR_REVEAL: :frag (appear)
+- Clarence and Leadger
+- Automate billing
+- APIs and Routing
+- Clojure(Script)
+- Code: https://github.com/BuddhiLW/commons-csv-clj
+*** Example
+#+begin_src clojure :eval no
+(defn cnpj#
+  "take a =CNPJ-value= and narrow down to the subclass which has this CNPJ"
+  [CNPJ-value vec-revenues]
+  (filter #(submap? {:CNPJ CNPJ-value} %) vec-revenues))
+#+end_src
+
+#+begin_src clojure :eval no
+(cnpj# "17194123000103" vec-revenues)
+#+end_src
+*** Literate documentation
+#+ATTR_HTML: :width 1200px
+[[file:img/FlowFinance.png][file:img/FlowFinance.png]]
+** Lupo S.A.
+#+ATTR_REVEAL: :frag (appear)
+- Technical Report Automation.
+- Inventory of 300+ machines.
+- Used Clojure (not best choice).
+- Code: https://github.com/BuddhiLW/CloshBashika
+*** Example
+#+ATTR_HTML: :width 1200px
+[[file:img/lupo.jpg][file:img/lupo.jpg]]
+*** Freelance with a group of Safety Engineers
+#+ATTR_HTML: :width 1000px
+[[file:img/lupo2.jpeg]]
+* Projects
+** HTML/CSS -- Instagram Replica
+:PROPERTIES:
+:reveal_background_iframe: https://buddhilw.github.io/Instagram-replica/
+:reveal_background: rgb(250,250,250)
+:reveal_foreground: rgb(100,0,100)
+:reveal_background_opacity: 0.90
+:html_container_class: title__cards
+:END:
+** JS/Elm -- Matching Cards game
+:PROPERTIES:
+:reveal_background_iframe: https://buddhilw.github.io/MatchingCards/
+:reveal_background: rgb(250,250,250)
+:reveal_foreground: rgb(100,0,100)
+:reveal_background_opacity: 0.90
+:html_container_class: title__cards
+:END:
+** Clojure(Script) -- Personal Website
+:PROPERTIES:
+:reveal_background_iframe: https://www.buddhilw.com/
+:reveal_background: rgb(250,250,250)
+:reveal_foreground: rgb(100,0,100)
+:reveal_background_opacity: 0.90
+:html_container_class: title__cards
+:END:
+
+** Clojure(Script) -- Giggin
+- Not yet deployed.
+- Shopping site.
+
+#+ATTR_HTML: :width 600px
+[[file:img/img-giggin.png][file:./img/img-giggin.png]]
+** Clojure(Script) -- Certifications Portfolio
+:PROPERTIES:
+:reveal_background_iframe: https://buddhilw.github.io/bug-free-fiesta/
+:reveal_background: rgb(250,250,250)
+:reveal_foreground: rgb(100,0,100)
+:reveal_background_opacity: 0.90
+:html_container_class: title__cards
+:END:
+
+** System's functionalities
+*** Pomodoro -- Go/Bash
+- Self-management.
+- Data collection.
+- Statistics about yourself.
+
+#+ATTR_HTML: :width 500px
+[[file:img/pomo.png][file:./img/pomo.png]]
+
+*** Note-taking (Diary) -- Elisp/Emacs
+- Take notes, whitout the need to thing too much.
+- Bind it to three key-strokes.
+
+#+begin_src emacs-lisp :tangle yes
+(defun lw/create-or-access-diary ()
+  (interactive)
+  (if (not (file-exists-p (lw/diary-day-entry)))
+      (or (write-region
+           (format "#+TITLE: %s" (shell-command-to-string "echo -n $(date +%Y-%m-%d) \n"))
+           nil
+           (lw/diary-day-entry))
+          (find-file (lw/diary-day-entry)))
+    (find-file (lw/diary-day-entry))))
+#+end_src
+*** Note-taking (Diary) -- Elisp/Emacs
+#+ATTR_HTML: :width 600px
+[[file:img/diary.png][file:./img/diary.png]]
+** Trading Bot
+Code (FOSS):
+- https://github.com/freqtrade/freqtrade
+- https://github.com/BuddhiLW/studious-carnival 
+- https://github.com/BuddhiLW/FreqTrade-backtesting
+
+** API Integration to Stark Bank
+- Access: https://github.com/BuddhiLW/stark-challenge
+*** Main tasks - Invoice generation
+Generate =Invoice= payment bills.
+#+begin_src clojure :eval no
+(invoice/create [(help/gen-invoice-map
+                  (help/r-amount 100000)
+                  (first (map help/due-timestamp (help/gen-three-hours)))
+                  (cnpj/gen)
+                  (names/name-maker)
+                  (help/r-exp)
+                  (help/r-fine)
+                  (help/r-interest)
+                  help/descr-ex)])
+#+end_src
+*** Server-side Webhook responses
+- Deal with =POST= requests, from Webhook.
+- Responses from Invoice Generation
+#+ATTR_HTML: :width 600px
+[[file:img/request-bin.png][file:img/request-bin.png]]
+** Application walkthrough
+:PROPERTIES:
+:reveal_background_iframe: https://www.youtube.com/channel/UCcDTD0VMlN2tGA7sDVZllRw
+:reveal_background: rgb(250,250,250)
+:reveal_foreground: rgb(100,0,100)
+:reveal_background_opacity: 0.90
+:reveal_data_state: title__alien--state
+:html_container_class: title__alien--class
+:END:
+
