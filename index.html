@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Case: Quake Report</title>
+<meta name="author" content="Pedro G. Branquinho"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.css"/>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/dist/theme/moon.css" id="theme"/>
+
+<link rel="stylesheet" href="./css/blood.css"/>
+
+<link rel="stylesheet" href="./css/fonts.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.2.0/plugin/highlight/monokai.css"/></head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><h1 class="title">Case: Quake Report</h1><p class="subtitle"></p>
+<h2 class="author">Pedro G. Branquinho</h2>
+</section>
+
+<section>
+<section id="slide-org91de845">
+<h2 id="org91de845">Entry point</h2>
+<p>
+<code>/cmd/qrep/main.go</code>
+</p>
+</section>
+<section id="slide-orgab1debd">
+<h3 id="orgab1debd">Tree view</h3>
+
+<div id="org446f7df" class="figure">
+<p><img src="img/cw-entry-point.png" alt="cw-entry-point.png" width="600px" />
+</p>
+</div>
+</section>
+<section id="slide-org5d9c9e0">
+<h3 id="org5d9c9e0">Code</h3>
+<div class="org-src-container">
+
+<pre   ><code class="go" >package main
+
+import report "github.com/BuddhiLW/cloud-walk-techtest/report"
+
+// tree grown from branch
+func main() { report.Cmd.Run() }
+</code></pre>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-org6f63759">
+<h2 id="org6f63759"><code>report</code> Command</h2>
+<p>
+A <b>Bonzai-branch</b> command
+</p>
+</section>
+<section id="slide-org18e4ee2">
+<h3 id="org18e4ee2">Tree view</h3>
+
+<div id="orga17d929" class="figure">
+<p><img src="img/cw-tree-report-cli.png" alt="cw-tree-report-cli.png" width="600px" />
+</p>
+</div>
+</section>
+<section id="slide-orgd34b84e">
+<h3 id="orgd34b84e">Structure <code>Z.Cmd</code> (Main branch)</h3>
+<p>
+Metadata and Commands
+</p>
+
+<div class="org-src-container">
+
+<pre   ><code class="go" >var Cmd = &amp;Z.Cmd{
+	Name:      `qrep`,
+
+	// (...) Meta-data
+	// Summary:   `Quake Report: A Bonzai composite command tree, for generating Reports for Cloud Walk technical test`,
+
+	Commands: []*Z.Cmd{
+		// standard external branch imports (see rwxrob/{help,conf,vars})
+		help.Cmd, conf.Cmd, vars.Cmd,
+
+		// local commands (in this module)
+		ReportCmd,
+	},
+
+	// More meta-data
+	Description: `(...)`,
+}
+</code></pre>
+</div>
+</section>
+<section id="slide-org159a8d7">
+<h3 id="org159a8d7">Structure <code>Z.Cmd</code> (Leaf)</h3>
+<div class="org-src-container">
+
+<pre   ><code class="go" >var ReportCmd = &amp;Z.Cmd{
+	Name:     `report`,
+	Aliases:  []string{`data`},
+	Usage:    `&lt;number&gt;`,
+	Summary:  `*data*, or *report*, is the root of the quake-report binary-tree.`,
+	NumArgs:  0,
+	Commands: []*Z.Cmd{help.Cmd, RankCmd, StatisticsCmd},
+	//
+	Call: func(_ *Z.Cmd, args ...string) error {
+		// Terminal-client interface logic
+	},
+}
+</code></pre>
+</div>
+</section>
+<section id="slide-org2041547">
+<h3 id="org2041547"><code>Call</code> (Cli-interface programming)</h3>
+<div class="org-src-container">
+
+<pre   ><code class="go" >Call: func(_ *Z.Cmd, args ...string) error {
+	// Terminal client interface logic
+	if len(args) == 0 {
+		log.Print("Displaying all matches, in JSON format")
+		g.GameOutput()
+		return nil
+	} else {
+		log.Print("Match chosen: ", args[0])
+		// Parse as int
+		n, err := strconv.Atoi(args[0])
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if n &gt;= 1 {
+			_ = g.GameOutput(n)
+		} else {
+			log.Fatal("Invalid Match number. Must be greater or equal to 1.")
+		}
+		return nil
+	}
+}
+</code></pre>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-orgdb17d26">
+<h2 id="orgdb17d26">Data <b>fetching</b> and <b>parsing</b></h2>
+<div class="outline-text-2" id="text-orgdb17d26">
+</div>
+</section>
+<section id="slide-org4a408d6">
+<h3 id="org4a408d6">Tree view</h3>
+
+<div id="orgb9bfaa4" class="figure">
+<p><img src="img/cw-tree-data-extraction.png" alt="cw-tree-data-extraction.png" width="600px" />
+</p>
+</div>
+</section>
+<section id="slide-org15832df">
+<h3 id="org15832df">Data fetch (<code>client.go</code>)</h3>
+<div class="outline-text-3" id="text-org15832df">
+</div>
+</section>
+<section id="slide-org8144f38">
+<h4 id="org8144f38">Gist</h4>
+<div class="org-src-container">
+
+<pre   ><code class="go" >func (g Gist) ReadGist() RawData {
+	resp, err := http.Get(g.url())
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	var rawData RawData = RawData(body)
+	return rawData
+}
+
+</code></pre>
+</div>
+</section>
+<section id="slide-orge32bbb5">
+<h4 id="orge32bbb5">Local file (for <code>tests</code>)</h4>
+<div class="org-src-container">
+
+<pre   ><code class="go" >func (path Path) ReadFile() RawData {
+	content, err := os.ReadFile(path.String())
+	if err != nil {
+		panic(err)
+	}
+
+	return RawData(content)
+}
+</code></pre>
+</div>
+</section>
+<section id="slide-org27ebec7">
+<h3 id="org27ebec7">Data Parsing (<code>conversions.go</code>)</h3>
+<div class="outline-text-3" id="text-org27ebec7">
+</div>
+</section>
+<section id="slide-org1154e41">
+<h4 id="org1154e41"><code>RawData</code> to <code>RawGames</code></h4>
+<div class="org-src-container">
+
+<pre   ><code class="go" >func (r RawData) ToGames() RawGames {
+	dataBySplit := RawGames{}
+	splits := strings.Split(r.String(), "------------------------------------------------------------")
+
+	for _, v := range splits {
+		// has regex =InitGame:= or not -- determine if it's a game
+		if strings.Contains(v, "InitGame:") {
+			dataBySplit[gameCount] = RawGame(v)
+		}
+	}
+	return dataBySplit
+}
+</code></pre>
+</div>
+</section>
+<section id="slide-orgc4a00a6">
+<h4 id="orgc4a00a6"><code>RawGame</code> to <code>Lines</code></h4>
+<div class="org-src-container">
+
+<pre   ><code class="go" >func (rg RawGame) ToLines() []Line {
+	var lines []Line
+	for _, v := range strings.Split(rg.String(), "\n") {
+		line := Line(v)
+		lines = append(lines, line)
+	}
+	return lines
+}
+</code></pre>
+</div>
+</section>
+<section id="slide-org13950c4">
+<h3 id="org13950c4">Data Extraction (<code>extraction.go</code>)</h3>
+<div class="outline-text-3" id="text-org13950c4">
+</div>
+</section>
+<section id="slide-orgce5e71a">
+<h4 id="orgce5e71a">Create the list of <code>players</code></h4>
+<p>
+Given a parsed <code>game</code> data, extract the players of that match.
+</p>
+
+<div class="org-src-container">
+
+<pre   ><code class="go" >func (lines GameLines) Players() *p.Players {
+	players := p.NewPlayers() // map[string]p.Player{}
+
+	// Extract players from the lines
+	for _, v := range lines {
+		if v.HasPlayer() {
+			playerName := v.ExtractPlayer()
+			if !containPlayer(players, playerName) {
+				player := p.NewPlayer(playerName)
+				players.AddPlayer(player)
+			}
+		}
+	}
+
+	return players
+}
+</code></pre>
+</div>
+</section>
+<section id="slide-org291b673">
+<h4 id="org291b673">Count <code>kills</code> (mutate <code>players</code> struct)</h4>
+<div class="org-src-container">
+
+<pre   ><code class="go" >func (lines GameLines) Kills(players *p.Players) {
+	for _, v := range lines {
+		if v.HasKill() {
+			killer, killed, action := v.ExtractAction() // killer, killed, action
+			player := (*players)[killer.String()]
+			player.AddKill(killed.String(), action.String())
+		}
+	}
+
+	// Count total kills, for each player
+	for _, p := range *players {
+		p.Kills = p.Victims.CountKills()
+	}
+}
+</code></pre>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-orga59683a">
+<h2 id="orga59683a"><code>Game</code>, <code>Player</code> and <code>Encoding</code> Abstraction</h2>
+<div class="outline-text-2" id="text-orga59683a">
+</div>
+</section>
+<section id="slide-org9a4fe39">
+<h3 id="org9a4fe39">Tree view</h3>
+
+<div id="orgbbccce2" class="figure">
+<p><img src="img/cw-tree-game-player.png" alt="cw-tree-game-player.png" width="600px" />
+</p>
+</div>
+</section>
+<section id="slide-org4ac41f6">
+<h3 id="org4ac41f6">Logic (<code>types</code>)</h3>
+<div class="outline-text-3" id="text-org4ac41f6">
+</div>
+</section>
+<section id="slide-orgdb803a5">
+<h4 id="orgdb803a5">Game</h4>
+<div class="org-src-container">
+
+<pre   ><code class="go" >type Game struct {
+	Players player.Players
+}
+</code></pre>
+</div>
+</section>
+<section id="slide-orgb95ce8d">
+<h4 id="orgb95ce8d">Player</h4>
+<div class="org-src-container">
+
+<pre   ><code class="go" >type Player struct {
+	Name    string  `json:"name"`
+	Kills   int     `json:"kills"`
+	Victims Victims `json:"victims"`
+}
+
+type Players map[string]*Player
+type Victims map[string]Ways
+type Ways map[string]int
+</code></pre>
+</div>
+</section>
+<section id="slide-orgf4e3b44">
+<h4 id="orgf4e3b44">Encoded Game (easy outputting)</h4>
+<div class="org-src-container">
+
+<pre   ><code class="go" >type EncodeGame struct {
+	TotalKills int      `json:"total_kills"`
+	Players    []string `json:"players"`
+	Kills      Kills    `json:"kills"`
+}
+
+type Kills map[string]Kill
+</code></pre>
+</div>
+</section>
+<section id="slide-org5aaf856">
+<h4 id="org5aaf856">Ranking</h4>
+<div class="org-src-container">
+
+<pre   ><code class="go" >type Rank struct {
+	Name     Name `json:"name"`
+	Kills    int  `json:"kills"`
+	Position int  `json:"position"`
+}
+
+type GameRank map[Name]*Rank
+</code></pre>
+</div>
+</section>
+<section id="slide-org9ccd5fc">
+<h3 id="org9ccd5fc">Methods</h3>
+<div class="outline-text-3" id="text-org9ccd5fc">
+</div>
+</section>
+<section id="slide-org82bfb93">
+<h4 id="org82bfb93">&ldquo;<code>Encoding</code>&rdquo;</h4>
+<p>
+Consider the <i>boundary rules</i> or <i>business logic</i> for <b>Report</b> functionality.
+</p>
+
+<div class="org-src-container">
+
+<pre   ><code class="go" >// Boundary rules for the game
+// 1. If the killer is "&lt;world&gt;", the kill is subtracted from the victim
+// 2. All kills by "&lt;world&gt;" are added to the total kills, normally
+// 3. "&lt;world&gt;" must not be listed as a player
+
+func (g *Game) NewEncodeGame() *EncodeGame {
+	totalKills := 0
+	killMap := Kills{}
+	playerNames := make([]string, 0, len(g.Players)-1)
+
+	for name, p := range g.Players {
+		if name == "&lt;world&gt;" {
+			// Conform to the counting rules 2 and 3.
+			// -------------------------------------------
+			totalKills += p.Kills
+		} else {
+			// Add player to the list of players
+			playerNames = append(playerNames, name)
+
+			totalKills += p.Kills
+
+			// Conform to the counting rule 1.
+			// -------------------------------------------
+			// Consider &lt;world&gt; kills into the calculation
+			// of the player's kills (score)
+			killMap[name] = g.countKills(name)
+		}
+	}
+
+	return &amp;EncodeGame{
+		TotalKills: totalKills,
+		Players:    playerNames,
+		Kills:      killMap,
+	}
+}
+</code></pre>
+</div>
+</section>
+<section id="slide-org31a34cf">
+<h4 id="org31a34cf">Count player&rsquo;s kills</h4>
+<div class="org-src-container">
+
+<pre   ><code class="go" >func (g *Game) countKills(name string) Kill {
+	// Get the kills from the player
+	kills := g.Players[name].Kills
+
+	// Remove the kills from the world
+	killWorld := g.Players["&lt;world&gt;"].Victims[name].CountKills()
+
+	// Calculate the kills
+	return Kill(kills - killWorld)
+}
+</code></pre>
+</div>
+</section>
+<section id="slide-org282d7da">
+<h4 id="org282d7da">Rank Players, by Kill Count</h4>
+<div class="org-src-container">
+
+<pre   ><code class="go" >func (g *EncodeGame) RankPlayersByKills() (*GameRank, []*Rank) {
+	gameRank := NewGameRank()
+	scoreList := make([]*Rank, 0, len(g.Kills))
+
+	for playerName, kill := range g.Kills {
+		rank := NewRank()
+		*rank = Rank{Name: Name(playerName), Kills: int(kill)}
+		scoreList = append(scoreList, rank)
+	}
+
+	sort.Slice(scoreList, func(i, j int) bool {
+		return scoreList[i].Kills &gt; scoreList[j].Kills // Descending order
+	})
+
+	for i, rank := range scoreList {
+		rank.Position = i + 1
+		(*gameRank)[rank.Name] = rank
+	}
+
+	return gameRank, scoreList
+}
+</code></pre>
+</div>
+</section>
+<section id="slide-orgc93408c">
+<h4 id="orgc93408c">Count the total kills of a given type</h4>
+<div class="org-src-container">
+
+<pre   ><code class="go" >func (g *Game) CountTypeKills() p.Ways {
+	ways := p.NewWays()
+
+	// Count the kills for each kill-mode, in the game
+	for _, p := range g.Players {
+		for _, way := range p.Victims {
+			for mode, kills := range way {
+				if ways.HasMode(mode) {
+					(*ways)[mode] += kills
+				} else {
+					(*ways)[mode] = kills
+				}
+			}
+		}
+	}
+	return *ways
+}
+</code></pre>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-orgb2829db">
+<h2 id="orgb2829db"><code>Output</code> and formatting</h2>
+<p>
+<code>/game/output.go</code>
+</p>
+</section>
+<section id="slide-orgf404e8f">
+<h3 id="orgf404e8f">Formatting</h3>
+<div class="org-src-container">
+
+<pre   ><code class="go" >func PrettyString(str string) (string, error) {
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&amp;prettyJSON, []byte(str), "", "    "); err != nil {
+		return "", err
+	}
+	return prettyJSON.String(), nil
+}
+</code></pre>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-org34b6e42">
+<h2 id="org34b6e42">About me&#x2026;</h2>
+<div class="outline-text-2" id="text-org34b6e42">
+</div>
+</section>
+<section id="slide-org1d5d1c9">
+<h3 id="org1d5d1c9">Languages I speak </h3>
+<ul>
+<li class="fragment appear">Portuguese 🇧🇷 &#x2013; Native</li>
+<li class="fragment appear">English 🇺🇸    &#x2013; C2    (Maximum-range score)</li>
+<li class="fragment appear">Russian 🇷🇺    &#x2013; Basic (currently learning)</li>
+<li class="fragment appear">Mandarin 🇨🇳   &#x2013; Basic (currently learning)</li>
+
+</ul>
+</section>
+<section id="slide-org5f1c957">
+<h3 id="org5f1c957">Jobs</h3>
+<div class="outline-text-3" id="text-org5f1c957">
+</div>
+</section>
+<section id="slide-orgea5e801">
+<h4 id="orgea5e801">FACTI - Campinas, SP</h4>
+<p>
+<code>Fundação de Apoio à Capacitação de Tecnologia da Informação</code>
+</p>
+<ul class="org-ul">
+<li><a id="org2c8eba3"></a>Help desk app (a week)<br /></li>
+<li><a id="org64dc54c"></a>Fast PDFs with a lot of banking data<br /></li>
+</ul>
+</section>
+<section id="slide-org01c0091">
+<h4 id="org01c0091">Café do Bem (NPO)</h4>
+<ul>
+<li class="fragment appear">High quality coffee.</li>
+<li class="fragment appear">The gains returns to coffee producers.</li>
+<li class="fragment appear">Resilience for the coffee community.</li>
+<li class="fragment appear"><a href="https://cafe-do-bem.company.site/">https://cafe-do-bem.company.site/</a></li>
+
+</ul>
+<ul class="org-ul">
+<li><a id="orga87509f"></a>The website<br />
+<div id="org55294c2" class="figure">
+<p><a href="img/cafe-do-bem.png" width="1200px"><img src="img/cafe-do-bem.png" alt="cafe-do-bem.png" width="1200px" /></a>
+</p>
+</div>
+</li>
+</ul>
+</section>
+<section id="slide-org6b4b523">
+<h4 id="org6b4b523">As a Contractor</h4>
+<div class="outline-text-4" id="text-org6b4b523">
+</div>
+<ul class="org-ul">
+<li><a id="org36c7332"></a>Advanced statistical analysis of Bidding prices<br />
+<ul class="org-ul">
+<li><a id="org28787b4"></a>Grouping in Categories<br />
+<div id="org4758a76" class="figure">
+<p><a href="img/rplot.png" width="1200px"><img src="img/rplot.png" alt="rplot.png" width="1200px" /></a>
+</p>
+</div>
+</li>
+</ul>
+</li>
+<li><a id="orge06613f"></a>Data converter XML to CSV<br />
+<div class="org-src-container">
+
+<pre   ><code class="xml" >&lt;?xml version='1.0' encoding='utf-8'?&gt;
+&lt;ns3:Servico&gt;
+  &lt;ns3:Valores&gt;
+    &lt;ns3:ValorServicos&gt;102349.00&lt;/ns3:ValorServicos&gt;
+    &lt;ns3:IssRetido&gt;2&lt;/ns3:IssRetido&gt;
+    &lt;ns3:ValorIss&gt;0.00&lt;/ns3:ValorIss&gt;
+    &lt;ns3:BaseCalculo&gt;102349.00&lt;/ns3:BaseCalculo&gt;
+    &lt;ns3:Aliquota&gt;0.0425&lt;/ns3:Aliquota&gt;
+    &lt;ns3:ValorLiquidoNfse&gt;102349.00&lt;/ns3:ValorLiquidoNfse&gt;
+    &lt;ns3:ValorIssRetido&gt;0&lt;/ns3:ValorIssRetido&gt;
+  &lt;/ns3:Valores&gt;
+  &lt;ns3:ItemListaServico&gt;2501&lt;/ns3:ItemListaServico&gt;
+  &lt;ns3:CodigoTributacaoMunicipio&gt;
+  960330400&lt;/ns3:CodigoTributacaoMunicipio&gt;
+  &lt;ns3:Discriminacao&gt;- PLANOS FUNERÁRIOS RECEBIDOS EM MARÇO -
+  R$ 102.349,00 - VALOR APROXIMADO DOS TRIBUTOS - R$
+  13.366,78&lt;/ns3:Discriminacao&gt;
+  &lt;ns3:MunicipioPrestacaoServico&gt;
+  3516200&lt;/ns3:MunicipioPrestacaoServico&gt;
+&lt;/ns3:Servico&gt;
+</code></pre>
+</div>
+</li>
+<li><a id="org39bb1a8"></a>Data converter XML to CSV<br />
+<ul>
+<li>2409 instances of data.</li>
+
+</ul>
+<div class="org-src-container">
+
+<pre   ><code class="csv" >Date, Prestador, RazaoSocial, CPF, Tributos, ValorServico
+2018-01-05T10:32:20, FUNERARIA FRANCANA LTDA, RITA APARECIDA PEREIRA DA SILVA, 19636387869, 456.48, 3600.0
+</code></pre>
+</div>
+</li>
+<li><a id="org52cdb66"></a>Data converter XML to CSV<br />
+<div class="org-src-container">
+
+<pre   ><code class="clojure" >(defn -&gt;row-csv
+  "razão-social, cpf, prestador, tributos, valor-seviço"
+  [data]
+  (let [date (h/date data)
+        rs (h/tomador-razao-social data)
+        cpf (tomador-cpf data)
+        prest (prestador data)
+        trib (str (tributos data))
+        valor-servico (str (val-serv data))]
+    (-&gt; (-&gt;&gt; [date prest rs cpf trib valor-servico]
+             (interpose ", ")
+             (apply str))
+        (clojure.string/replace "\n" "")
+        (clojure.string/replace #"\s+" " ")
+        (str "\n"))))
+</code></pre>
+</div>
+</li>
+<li><a id="orgc34ba89"></a>Data converter XML to CSV<br />
+<div class="org-src-container">
+
+<pre   ><code class="clojure" >(defn tributos [data]
+  (-&gt; (-&gt;&gt; data
+           :content
+           (filter #(= (:tag %) :Servico))
+           first
+           :content
+           (filter #(= (:tag %) :Discriminacao))
+           first)
+      :content
+      first
+      parse-trib-val))
+</code></pre>
+</div>
+</li>
+<li><a id="orgd0571c7"></a>Data converter XML to CSV<br />
+<div class="org-src-container">
+
+<pre   ><code class="clojure" >(h/tributos (first data))
+</code></pre>
+</div>
+<pre class="example">
+=&gt; 456.48
+</pre>
+</li>
+<li><a id="org5a05df6"></a>Analysis of Growth<br />
+<div id="org87b210e" class="figure">
+<p><img src="img/Arrecadamento.png" alt="Arrecadamento.png" width="1000px" />
+</p>
+</div>
+</li>
+<li><a id="orgbb2926f"></a>Analysis of <code>Tax</code> and <code>Revenues</code><br />
+<div id="org314ea6c" class="figure">
+<p><img src="img/Dist-serv.png" alt="Dist-serv.png" width="1000px" />
+</p>
+</div>
+</li>
+<li><a id="org8e5fdf3"></a>Analysis of <code>Tax</code> and <code>Revenues</code><br />
+<div id="orga83bd9f" class="figure">
+<p><img src="img/Serv-z.png" alt="Serv-z.png" width="1000px" />
+</p>
+</div>
+</li>
+<li><a id="orga7f345b"></a>Analysis of <code>Tax</code> and <code>Revenues</code><br />
+<div id="org72d6109" class="figure">
+<p><img src="img/Dist-trib.png" alt="Dist-trib.png" width="1000px" />
+</p>
+</div>
+</li>
+<li><a id="org638ea8f"></a>Find and explain abnormalities in <code>Revenue</code><br />
+<div class="org-src-container">
+
+<pre   ><code class="julia" >subset(df_mmz, :Serv_z =&gt; ByRow(&lt;(-1.5)))
+</code></pre>
+</div>
+<pre class="example" id="org38dff0b">
+8×6 DataFrame
+ Row │ Data_function  Tributos_sum  ValorServico_sum  id     Trib_z    Serv_z
+     │ Tuple…         Float64       Float64           Int64  Float64   Float64
+─────┼──────────────────────────────────────────────────────────────────────────
+   1 │ (2018, 5)          11417.4            83590.0      5  -1.67904  -1.90722
+   2 │ (2018, 7)          13226.0            96458.0      7  -1.35084  -1.51121
+   3 │ (2018, 8)          12309.0            89650.0      8  -1.51725  -1.72072
+   4 │ (2018, 9)          10813.5            80870.0      9  -1.78863  -1.99092
+   5 │ (2018, 10)         11929.1            86760.0     10  -1.58619  -1.80966
+   6 │ (2018, 11)         11754.4            86400.0     11  -1.61789  -1.82074
+   7 │ (2018, 12)         11934.2            89160.0     12  -1.58526  -1.7358
+   8 │ (2019, 6)           9095.84           69021.4     18  -2.10034  -2.35555
+</pre>
+</li>
+<li><a id="orgbae2cde"></a>Correlation between <code>Tax</code> and <code>Income</code><br />
+<div class="org-src-container">
+
+<pre   ><code class="julia" >cor(df_mm.Tributos_sum, df_mm.ValorServico_sum)
+</code></pre>
+</div>
+<pre class="example">
+89.12%
+</pre>
+</li>
+<li><a id="orgf877a4e"></a>Hypothesis test data on equal variation<br />
+<ul>
+<li>Julia interoperation with R.</li>
+
+</ul>
+<div class="org-src-container">
+
+<pre   ><code class="julia" >trib_z = df_mmz.Trib_z
+val_serv_z = df_mmz.Serv_z
+R"var.test($trib_z, y = $val_serv_z)"
+</code></pre>
+</div>
+
+<pre class="example" id="orgdd1a835">
+        F test to compare two variances
+
+data:  `#JL`$trib_z and `#JL`$val_serv_z
+F = 1, num df = 56, denom df = 56, p-value = 1
+</pre>
+</li>
+</ul>
+</section>
+<section id="slide-org09f304c">
+<h4 id="org09f304c">Flow Finance</h4>
+<ul>
+<li class="fragment appear">Clarence and Leadger</li>
+<li class="fragment appear">Automate billing</li>
+<li class="fragment appear">APIs and Routing</li>
+<li class="fragment appear">Clojure(Script)</li>
+<li class="fragment appear">Code: <a href="https://github.com/BuddhiLW/commons-csv-clj">https://github.com/BuddhiLW/commons-csv-clj</a></li>
+
+</ul>
+<ul class="org-ul">
+<li><a id="org2efc9f2"></a>Example<br />
+<div class="org-src-container">
+
+<pre   ><code class="clojure" >(defn cnpj#
+  "take a =CNPJ-value= and narrow down to the subclass which has this CNPJ"
+  [CNPJ-value vec-revenues]
+  (filter #(submap? {:CNPJ CNPJ-value} %) vec-revenues))
+</code></pre>
+</div>
+
+<div class="org-src-container">
+
+<pre   ><code class="clojure" >(cnpj# "17194123000103" vec-revenues)
+</code></pre>
+</div>
+</li>
+<li><a id="org5a780e5"></a>Literate documentation<br />
+<div id="orga4e1096" class="figure">
+<p><a href="img/FlowFinance.png" width="1200px"><img src="img/FlowFinance.png" alt="FlowFinance.png" width="1200px" /></a>
+</p>
+</div>
+</li>
+</ul>
+</section>
+<section id="slide-orgb67c6e2">
+<h4 id="orgb67c6e2">Lupo S.A.</h4>
+<ul>
+<li class="fragment appear">Technical Report Automation.</li>
+<li class="fragment appear">Inventory of 300+ machines.</li>
+<li class="fragment appear">Used Clojure (not best choice).</li>
+<li class="fragment appear">Code: <a href="https://github.com/BuddhiLW/CloshBashika">https://github.com/BuddhiLW/CloshBashika</a></li>
+
+</ul>
+<ul class="org-ul">
+<li><a id="org8e03c14"></a>Example<br />
+<div id="orgf54ba35" class="figure">
+<p><a href="img/lupo.jpg" width="1200px"><img src="img/lupo.jpg" alt="lupo.jpg" width="1200px" /></a>
+</p>
+</div>
+</li>
+<li><a id="orgcb34e6b"></a>Freelance with a group of Safety Engineers<br />
+<div id="org3e883b9" class="figure">
+<p><img src="img/lupo2.jpeg" alt="lupo2.jpeg" width="1000px" />
+</p>
+</div>
+</li>
+</ul>
+</section>
+<section id="slide-orga529edd">
+<h3 id="orga529edd">Projects</h3>
+<div class="outline-text-3" id="text-orga529edd">
+</div>
+</section>
+<section id="slide-org10afb99" class="title__cards" data-background-iframe="https://buddhilw.github.io/Instagram-replica/" data-background-interactive>
+<div style="background: rgb(250,250,250); opacity: 0.90; ">
+<h4 id="org10afb99">HTML/CSS &#x2013; Instagram Replica</h4>
+</div>
+</section>
+<section id="slide-orgf105487" class="title__cards" data-background-iframe="https://buddhilw.github.io/MatchingCards/" data-background-interactive>
+<div style="background: rgb(250,250,250); opacity: 0.90; ">
+<h4 id="orgf105487">JS/Elm &#x2013; Matching Cards game</h4>
+</div>
+</section>
+<section id="slide-orge793f37" class="title__cards" data-background-iframe="https://www.buddhilw.com/" data-background-interactive>
+<div style="background: rgb(250,250,250); opacity: 0.90; ">
+<h4 id="orge793f37">Clojure(Script) &#x2013; Personal Website</h4>
+</div>
+</section>
+<section id="slide-org79126ca">
+<h4 id="org79126ca">Clojure(Script) &#x2013; Giggin</h4>
+<ul>
+<li>Not yet deployed.</li>
+<li>Shopping site.</li>
+
+</ul>
+
+
+<div id="org0b5138f" class="figure">
+<p><a href="img/img-giggin.png" width="600px"><img src="./img/img-giggin.png" alt="img-giggin.png" width="600px" /></a>
+</p>
+</div>
+</section>
+<section id="slide-orgd10cc70" class="title__cards" data-background-iframe="https://buddhilw.github.io/bug-free-fiesta/" data-background-interactive>
+<div style="background: rgb(250,250,250); opacity: 0.90; ">
+<h4 id="orgd10cc70">Clojure(Script) &#x2013; Certifications Portfolio</h4>
+</div>
+</section>
+<section id="slide-org631513c">
+<h4 id="org631513c">System&rsquo;s functionalities</h4>
+<div class="outline-text-4" id="text-org631513c">
+</div>
+<ul class="org-ul">
+<li><a id="orga3355bd"></a>Pomodoro &#x2013; Go/Bash<br />
+<ul>
+<li>Self-management.</li>
+<li>Data collection.</li>
+<li>Statistics about yourself.</li>
+
+</ul>
+
+
+<div id="orga08eb9e" class="figure">
+<p><a href="img/pomo.png" width="500px"><img src="./img/pomo.png" alt="pomo.png" width="500px" /></a>
+</p>
+</div>
+</li>
+<li><a id="org1f449a1"></a>Note-taking (Diary) &#x2013; Elisp/Emacs<br />
+<ul>
+<li>Take notes, whitout the need to thing too much.</li>
+<li>Bind it to three key-strokes.</li>
+
+</ul>
+
+<div class="org-src-container">
+
+<pre   ><code class="emacs-lisp" >(defun lw/create-or-access-diary ()
+  (interactive)
+  (if (not (file-exists-p (lw/diary-day-entry)))
+      (or (write-region
+           (format "#+TITLE: %s" (shell-command-to-string "echo -n $(date +%Y-%m-%d) \n"))
+           nil
+           (lw/diary-day-entry))
+          (find-file (lw/diary-day-entry)))
+    (find-file (lw/diary-day-entry))))
+</code></pre>
+</div>
+</li>
+<li><a id="org7bcabe9"></a>Note-taking (Diary) &#x2013; Elisp/Emacs<br />
+<div id="org26cfba1" class="figure">
+<p><a href="img/diary.png" width="600px"><img src="./img/diary.png" alt="diary.png" width="600px" /></a>
+</p>
+</div>
+</li>
+</ul>
+</section>
+<section id="slide-orge4b6279">
+<h4 id="orge4b6279">Trading Bot</h4>
+<p>
+Code (FOSS):
+</p>
+<ul>
+<li><a href="https://github.com/freqtrade/freqtrade">https://github.com/freqtrade/freqtrade</a></li>
+<li><a href="https://github.com/BuddhiLW/studious-carnival">https://github.com/BuddhiLW/studious-carnival</a></li>
+<li><a href="https://github.com/BuddhiLW/FreqTrade-backtesting">https://github.com/BuddhiLW/FreqTrade-backtesting</a></li>
+
+</ul>
+</section>
+<section id="slide-org50875fa">
+<h4 id="org50875fa">API Integration to Stark Bank</h4>
+<ul>
+<li>Access: <a href="https://github.com/BuddhiLW/stark-challenge">https://github.com/BuddhiLW/stark-challenge</a></li>
+
+</ul>
+<ul class="org-ul">
+<li><a id="org7de4b73"></a>Main tasks - Invoice generation<br />
+<p>
+Generate <code>Invoice</code> payment bills.
+</p>
+<div class="org-src-container">
+
+<pre   ><code class="clojure" >(invoice/create [(help/gen-invoice-map
+                  (help/r-amount 100000)
+                  (first (map help/due-timestamp (help/gen-three-hours)))
+                  (cnpj/gen)
+                  (names/name-maker)
+                  (help/r-exp)
+                  (help/r-fine)
+                  (help/r-interest)
+                  help/descr-ex)])
+</code></pre>
+</div>
+</li>
+<li><a id="orgb019fb6"></a>Server-side Webhook responses<br />
+<ul>
+<li>Deal with <code>POST</code> requests, from Webhook.</li>
+<li>Responses from Invoice Generation</li>
+
+</ul>
+
+<div id="org0de398a" class="figure">
+<p><a href="img/request-bin.png" width="600px"><img src="img/request-bin.png" alt="request-bin.png" width="600px" /></a>
+</p>
+</div>
+</li>
+</ul>
+</section>
+<section id="slide-org8e97734" class="title__alien--class" data-state="title__alien--state" data-background-iframe="https://www.youtube.com/channel/UCcDTD0VMlN2tGA7sDVZllRw" data-background-interactive>
+<div style="background: rgb(250,250,250); opacity: 0.90; ">
+<h4 id="org8e97734">Application walkthrough</h4>
+</div>
+</section>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/plugin/highlight/highlight.js"></script>
+
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+plugins: [RevealHighlight]
+});
+
+</script>
+<script src="./js/caption.js"></script>
+<script src="./js/style.js"></script>
+</body>
+</html>
