@@ -370,7 +370,7 @@ func PrettyString(str string) (string, error) {
 - Russian 🇷🇺    -- Basic (currently learning)
 - Mandarin 🇨🇳   -- Basic (currently learning)
 
-** Jobs
+* Jobs
 *** FACTI - Campinas, SP
 =Fundação de Apoio à Capacitação de Tecnologia da Informação=
 **** Help desk app (a week)
@@ -559,7 +559,7 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 **** Freelance with a group of Safety Engineers
 #+ATTR_HTML: :width 1000px
 [[file:img/lupo2.jpeg]]
-** Projects
+* Projects
 *** HTML/CSS -- Instagram Replica
 :PROPERTIES:
 :reveal_background_iframe: https://buddhilw.github.io/Instagram-replica/
