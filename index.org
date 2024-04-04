@@ -371,9 +371,9 @@ func PrettyString(str string) (string, error) {
 - Mandarin 🇨🇳   -- Basic (currently learning)
 
 * Jobs
-*** FACTI - Campinas, SP
+** FACTI - Campinas, SP
 =Fundação de Apoio à Capacitação de Tecnologia da Informação=
-**** Help desk app (a week)
+*** Help desk app (a week)
 :PROPERTIES:
 :reveal_background_iframe: https://buddhilw.github.io/support-app/
 :reveal_background: rgb(250,250,250)
@@ -382,24 +382,24 @@ func PrettyString(str string) (string, error) {
 :reveal_data_state: title__alien--state
 :html_container_class: title__alien--class
 :END:
-**** Fast PDFs with a lot of banking data
+*** Fast PDFs with a lot of banking data
 
-*** Café do Bem (NPO)
+** Café do Bem (NPO)
 #+ATTR_REVEAL: :frag (appear)
 - High quality coffee.
 - The gains returns to coffee producers.
 - Resilience for the coffee community.
 - https://cafe-do-bem.company.site/
 
-**** The website
+*** The website
 #+ATTR_HTML: :width 1200px
 [[file:img/cafe-do-bem.png][file:img/cafe-do-bem.png]]
-*** As a Contractor
-**** Advanced statistical analysis of Bidding prices
-****** Grouping in Categories
+** As a Contractor
+*** Advanced statistical analysis of Bidding prices
+***** Grouping in Categories
 #+ATTR_HTML: :width 1200px
 [[file:img/rplot.png][file:img/rplot.png]]
-**** Data converter XML to CSV
+*** Data converter XML to CSV
 #+begin_src xml
 <?xml version='1.0' encoding='utf-8'?>
 <ns3:Servico>
@@ -422,13 +422,13 @@ func PrettyString(str string) (string, error) {
   3516200</ns3:MunicipioPrestacaoServico>
 </ns3:Servico>
 #+end_src
-**** Data converter XML to CSV
+*** Data converter XML to CSV
 - 2409 instances of data.
 #+begin_src csv
 Date, Prestador, RazaoSocial, CPF, Tributos, ValorServico
 2018-01-05T10:32:20, FUNERARIA FRANCANA LTDA, RITA APARECIDA PEREIRA DA SILVA, 19636387869, 456.48, 3600.0
 #+end_src
-**** Data converter XML to CSV
+*** Data converter XML to CSV
 
 #+begin_src clojure :eval no
 (defn ->row-csv
@@ -448,7 +448,7 @@ Date, Prestador, RazaoSocial, CPF, Tributos, ValorServico
         (str "\n"))))
 #+end_src
 
-**** Data converter XML to CSV
+*** Data converter XML to CSV
 #+begin_src clojure :eval no
 (defn tributos [data]
   (-> (->> data
@@ -462,29 +462,29 @@ Date, Prestador, RazaoSocial, CPF, Tributos, ValorServico
       first
       parse-trib-val))
 #+end_src
-**** Data converter XML to CSV
+*** Data converter XML to CSV
 #+begin_src clojure :eval no :exports both
 (h/tributos (first data))
 #+end_src
 #+RESULT:
 : => 456.48
 
-**** Analysis of Growth
+*** Analysis of Growth
 #+ATTR_HTML: :width 1000px
 [[file:img/Arrecadamento.png]]
-**** Analysis of =Tax= and =Revenues=
+*** Analysis of =Tax= and =Revenues=
 #+ATTR_HTML: :width 1000px
 [[file:img/Dist-serv.png]]
 
-**** Analysis of =Tax= and =Revenues=
+*** Analysis of =Tax= and =Revenues=
 #+ATTR_HTML: :width 1000px
 [[file:img/Serv-z.png]]
 
-**** Analysis of =Tax= and =Revenues=
+*** Analysis of =Tax= and =Revenues=
 #+ATTR_HTML: :width 1000px
 [[file:img/Dist-trib.png]]
 
-**** Find and explain abnormalities in =Revenue=
+*** Find and explain abnormalities in =Revenue=
 #+begin_src julia :exports both :eval no
 subset(df_mmz, :Serv_z => ByRow(<(-1.5)))
 #+end_src
@@ -504,13 +504,13 @@ subset(df_mmz, :Serv_z => ByRow(<(-1.5)))
    8 │ (2019, 6)           9095.84           69021.4     18  -2.10034  -2.35555
 #+end_example
 
-**** Correlation between =Tax= and =Income=
+*** Correlation between =Tax= and =Income=
 #+begin_src julia :exports both :eval no
 cor(df_mm.Tributos_sum, df_mm.ValorServico_sum)
 #+end_src
 #+RESULTS:
 : 89.12%
-**** Hypothesis test data on equal variation
+*** Hypothesis test data on equal variation
 - Julia interoperation with R.
 #+begin_src julia :exports both :eval no
 trib_z = df_mmz.Trib_z
@@ -526,14 +526,14 @@ data:  `#JL`$trib_z and `#JL`$val_serv_z
 F = 1, num df = 56, denom df = 56, p-value = 1
 #+end_example
 
-*** Flow Finance
+** Flow Finance
 #+ATTR_REVEAL: :frag (appear)
 - Clarence and Leadger
 - Automate billing
 - APIs and Routing
 - Clojure(Script)
 - Code: https://github.com/BuddhiLW/commons-csv-clj
-**** Example
+*** Example
 #+begin_src clojure :eval no
 (defn cnpj#
   "take a =CNPJ-value= and narrow down to the subclass which has this CNPJ"
@@ -544,23 +544,23 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 #+begin_src clojure :eval no
 (cnpj# "17194123000103" vec-revenues)
 #+end_src
-**** Literate documentation
+*** Literate documentation
 #+ATTR_HTML: :width 1200px
 [[file:img/FlowFinance.png][file:img/FlowFinance.png]]
-*** Lupo S.A.
+** Lupo S.A.
 #+ATTR_REVEAL: :frag (appear)
 - Technical Report Automation.
 - Inventory of 300+ machines.
 - Used Clojure (not best choice).
 - Code: https://github.com/BuddhiLW/CloshBashika
-**** Example
+*** Example
 #+ATTR_HTML: :width 1200px
 [[file:img/lupo.jpg][file:img/lupo.jpg]]
-**** Freelance with a group of Safety Engineers
+*** Freelance with a group of Safety Engineers
 #+ATTR_HTML: :width 1000px
 [[file:img/lupo2.jpeg]]
 * Projects
-*** HTML/CSS -- Instagram Replica
+** HTML/CSS -- Instagram Replica
 :PROPERTIES:
 :reveal_background_iframe: https://buddhilw.github.io/Instagram-replica/
 :reveal_background: rgb(250,250,250)
@@ -568,7 +568,7 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 :reveal_background_opacity: 0.90
 :html_container_class: title__cards
 :END:
-*** JS/Elm -- Matching Cards game
+** JS/Elm -- Matching Cards game
 :PROPERTIES:
 :reveal_background_iframe: https://buddhilw.github.io/MatchingCards/
 :reveal_background: rgb(250,250,250)
@@ -576,7 +576,7 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 :reveal_background_opacity: 0.90
 :html_container_class: title__cards
 :END:
-*** Clojure(Script) -- Personal Website
+** Clojure(Script) -- Personal Website
 :PROPERTIES:
 :reveal_background_iframe: https://www.buddhilw.com/
 :reveal_background: rgb(250,250,250)
@@ -585,13 +585,13 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 :html_container_class: title__cards
 :END:
 
-*** Clojure(Script) -- Giggin
+** Clojure(Script) -- Giggin
 - Not yet deployed.
 - Shopping site.
 
 #+ATTR_HTML: :width 600px
 [[file:img/img-giggin.png][file:./img/img-giggin.png]]
-*** Clojure(Script) -- Certifications Portfolio
+** Clojure(Script) -- Certifications Portfolio
 :PROPERTIES:
 :reveal_background_iframe: https://buddhilw.github.io/bug-free-fiesta/
 :reveal_background: rgb(250,250,250)
@@ -600,8 +600,8 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 :html_container_class: title__cards
 :END:
 
-*** System's functionalities
-**** Pomodoro -- Go/Bash
+** System's functionalities
+*** Pomodoro -- Go/Bash
 - Self-management.
 - Data collection.
 - Statistics about yourself.
@@ -609,7 +609,7 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 #+ATTR_HTML: :width 500px
 [[file:img/pomo.png][file:./img/pomo.png]]
 
-**** Note-taking (Diary) -- Elisp/Emacs
+*** Note-taking (Diary) -- Elisp/Emacs
 - Take notes, whitout the need to thing too much.
 - Bind it to three key-strokes.
 
@@ -624,18 +624,18 @@ F = 1, num df = 56, denom df = 56, p-value = 1
           (find-file (lw/diary-day-entry)))
     (find-file (lw/diary-day-entry))))
 #+end_src
-**** Note-taking (Diary) -- Elisp/Emacs
+*** Note-taking (Diary) -- Elisp/Emacs
 #+ATTR_HTML: :width 600px
 [[file:img/diary.png][file:./img/diary.png]]
-*** Trading Bot
+** Trading Bot
 Code (FOSS):
 - https://github.com/freqtrade/freqtrade
 - https://github.com/BuddhiLW/studious-carnival 
 - https://github.com/BuddhiLW/FreqTrade-backtesting
 
-*** API Integration to Stark Bank
+** API Integration to Stark Bank
 - Access: https://github.com/BuddhiLW/stark-challenge
-**** Main tasks - Invoice generation
+*** Main tasks - Invoice generation
 Generate =Invoice= payment bills.
 #+begin_src clojure :eval no
 (invoice/create [(help/gen-invoice-map
@@ -648,12 +648,12 @@ Generate =Invoice= payment bills.
                   (help/r-interest)
                   help/descr-ex)])
 #+end_src
-**** Server-side Webhook responses
+*** Server-side Webhook responses
 - Deal with =POST= requests, from Webhook.
 - Responses from Invoice Generation
 #+ATTR_HTML: :width 600px
 [[file:img/request-bin.png][file:img/request-bin.png]]
-*** Application walkthrough
+** Application walkthrough
 :PROPERTIES:
 :reveal_background_iframe: https://www.youtube.com/channel/UCcDTD0VMlN2tGA7sDVZllRw
 :reveal_background: rgb(250,250,250)

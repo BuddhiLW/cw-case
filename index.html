@@ -25,22 +25,22 @@
 </section>
 
 <section>
-<section id="slide-orgf4fed65">
-<h2 id="orgf4fed65">Entry point</h2>
+<section id="slide-org9b37fd4">
+<h2 id="org9b37fd4">Entry point</h2>
 <p>
 <code>/cmd/qrep/main.go</code>
 </p>
 </section>
-<section id="slide-orgbc68883">
-<h3 id="orgbc68883">Tree view</h3>
+<section id="slide-org8140a16">
+<h3 id="org8140a16">Tree view</h3>
 
-<div id="org8794b05" class="figure">
+<div id="org4b1cb13" class="figure">
 <p><img src="img/cw-entry-point.png" alt="cw-entry-point.png" width="600px" />
 </p>
 </div>
 </section>
-<section id="slide-orgdfa8f2b">
-<h3 id="orgdfa8f2b">Code</h3>
+<section id="slide-org47ff6f9">
+<h3 id="org47ff6f9">Code</h3>
 <div class="org-src-container">
 
 <pre   ><code class="go" >package main
@@ -54,22 +54,22 @@ func main() { report.Cmd.Run() }
 </section>
 </section>
 <section>
-<section id="slide-orga53661c">
-<h2 id="orga53661c"><code>report</code> Command</h2>
+<section id="slide-org647c3ea">
+<h2 id="org647c3ea"><code>report</code> Command</h2>
 <p>
 A <b>Bonzai-branch</b> command
 </p>
 </section>
-<section id="slide-org924129c">
-<h3 id="org924129c">Tree view</h3>
+<section id="slide-orga7f4b64">
+<h3 id="orga7f4b64">Tree view</h3>
 
-<div id="orgef3fb7e" class="figure">
+<div id="org882ef01" class="figure">
 <p><img src="img/cw-tree-report-cli.png" alt="cw-tree-report-cli.png" width="600px" />
 </p>
 </div>
 </section>
-<section id="slide-org2fdd0c1">
-<h3 id="org2fdd0c1">Structure <code>Z.Cmd</code> (Main branch)</h3>
+<section id="slide-orge75680c">
+<h3 id="orge75680c">Structure <code>Z.Cmd</code> (Main branch)</h3>
 <p>
 Metadata and Commands
 </p>
@@ -96,8 +96,8 @@ Metadata and Commands
 </code></pre>
 </div>
 </section>
-<section id="slide-org277cefd">
-<h3 id="org277cefd">Structure <code>Z.Cmd</code> (Leaf)</h3>
+<section id="slide-org28c092a">
+<h3 id="org28c092a">Structure <code>Z.Cmd</code> (Leaf)</h3>
 <div class="org-src-container">
 
 <pre   ><code class="go" >var ReportCmd = &amp;Z.Cmd{
@@ -115,8 +115,8 @@ Metadata and Commands
 </code></pre>
 </div>
 </section>
-<section id="slide-org02881ad">
-<h3 id="org02881ad"><code>Call</code> (Cli-interface programming)</h3>
+<section id="slide-orgc1543c4">
+<h3 id="orgc1543c4"><code>Call</code> (Cli-interface programming)</h3>
 <div class="org-src-container">
 
 <pre   ><code class="go" >Call: func(_ *Z.Cmd, args ...string) error {
@@ -146,26 +146,26 @@ Metadata and Commands
 </section>
 </section>
 <section>
-<section id="slide-org311e7de">
-<h2 id="org311e7de">Data <b>fetching</b> and <b>parsing</b></h2>
-<div class="outline-text-2" id="text-org311e7de">
+<section id="slide-orgbf8e16a">
+<h2 id="orgbf8e16a">Data <b>fetching</b> and <b>parsing</b></h2>
+<div class="outline-text-2" id="text-orgbf8e16a">
 </div>
 </section>
-<section id="slide-org53ec1b9">
-<h3 id="org53ec1b9">Tree view</h3>
+<section id="slide-org646ff9b">
+<h3 id="org646ff9b">Tree view</h3>
 
-<div id="org5b7c307" class="figure">
+<div id="org02d7b4e" class="figure">
 <p><img src="img/cw-tree-data-extraction.png" alt="cw-tree-data-extraction.png" width="600px" />
 </p>
 </div>
 </section>
-<section id="slide-org96b9bea">
-<h3 id="org96b9bea">Data fetch (<code>client.go</code>)</h3>
-<div class="outline-text-3" id="text-org96b9bea">
+<section id="slide-org51857d3">
+<h3 id="org51857d3">Data fetch (<code>client.go</code>)</h3>
+<div class="outline-text-3" id="text-org51857d3">
 </div>
 </section>
-<section id="slide-org6a20593">
-<h4 id="org6a20593">Gist</h4>
+<section id="slide-org387171c">
+<h4 id="org387171c">Gist</h4>
 <div class="org-src-container">
 
 <pre   ><code class="go" >func (g Gist) ReadGist() RawData {
@@ -186,8 +186,8 @@ Metadata and Commands
 </code></pre>
 </div>
 </section>
-<section id="slide-org29494e7">
-<h4 id="org29494e7">Local file (for <code>tests</code>)</h4>
+<section id="slide-org48616e8">
+<h4 id="org48616e8">Local file (for <code>tests</code>)</h4>
 <div class="org-src-container">
 
 <pre   ><code class="go" >func (path Path) ReadFile() RawData {
@@ -201,13 +201,13 @@ Metadata and Commands
 </code></pre>
 </div>
 </section>
-<section id="slide-orgd0de2a1">
-<h3 id="orgd0de2a1">Data Parsing (<code>conversions.go</code>)</h3>
-<div class="outline-text-3" id="text-orgd0de2a1">
+<section id="slide-orgcc89775">
+<h3 id="orgcc89775">Data Parsing (<code>conversions.go</code>)</h3>
+<div class="outline-text-3" id="text-orgcc89775">
 </div>
 </section>
-<section id="slide-org72073ea">
-<h4 id="org72073ea"><code>RawData</code> to <code>RawGames</code></h4>
+<section id="slide-orgc42185c">
+<h4 id="orgc42185c"><code>RawData</code> to <code>RawGames</code></h4>
 <div class="org-src-container">
 
 <pre   ><code class="go" >func (r RawData) ToGames() RawGames {
@@ -225,8 +225,8 @@ Metadata and Commands
 </code></pre>
 </div>
 </section>
-<section id="slide-org9507269">
-<h4 id="org9507269"><code>RawGame</code> to <code>Lines</code></h4>
+<section id="slide-org8217b6c">
+<h4 id="org8217b6c"><code>RawGame</code> to <code>Lines</code></h4>
 <div class="org-src-container">
 
 <pre   ><code class="go" >func (rg RawGame) ToLines() []Line {
@@ -240,13 +240,13 @@ Metadata and Commands
 </code></pre>
 </div>
 </section>
-<section id="slide-org6c0b842">
-<h3 id="org6c0b842">Data Extraction (<code>extraction.go</code>)</h3>
-<div class="outline-text-3" id="text-org6c0b842">
+<section id="slide-org4dcfe2d">
+<h3 id="org4dcfe2d">Data Extraction (<code>extraction.go</code>)</h3>
+<div class="outline-text-3" id="text-org4dcfe2d">
 </div>
 </section>
-<section id="slide-org77df764">
-<h4 id="org77df764">Create the list of <code>players</code></h4>
+<section id="slide-org8726bf7">
+<h4 id="org8726bf7">Create the list of <code>players</code></h4>
 <p>
 Given a parsed <code>game</code> data, extract the players of that match.
 </p>
@@ -272,8 +272,8 @@ Given a parsed <code>game</code> data, extract the players of that match.
 </code></pre>
 </div>
 </section>
-<section id="slide-org7c67bd3">
-<h4 id="org7c67bd3">Count <code>kills</code> (mutate <code>players</code> struct)</h4>
+<section id="slide-orgcccbc9a">
+<h4 id="orgcccbc9a">Count <code>kills</code> (mutate <code>players</code> struct)</h4>
 <div class="org-src-container">
 
 <pre   ><code class="go" >func (lines GameLines) Kills(players *p.Players) {
@@ -295,26 +295,26 @@ Given a parsed <code>game</code> data, extract the players of that match.
 </section>
 </section>
 <section>
-<section id="slide-org9c5437a">
-<h2 id="org9c5437a"><code>Game</code>, <code>Player</code> and <code>Encoding</code> Abstraction</h2>
-<div class="outline-text-2" id="text-org9c5437a">
+<section id="slide-orgb53ecc1">
+<h2 id="orgb53ecc1"><code>Game</code>, <code>Player</code> and <code>Encoding</code> Abstraction</h2>
+<div class="outline-text-2" id="text-orgb53ecc1">
 </div>
 </section>
-<section id="slide-org0ff4bb0">
-<h3 id="org0ff4bb0">Tree view</h3>
+<section id="slide-org5542393">
+<h3 id="org5542393">Tree view</h3>
 
-<div id="org948c358" class="figure">
+<div id="orgb4585f3" class="figure">
 <p><img src="img/cw-tree-game-player.png" alt="cw-tree-game-player.png" width="600px" />
 </p>
 </div>
 </section>
-<section id="slide-org7bfeeab">
-<h3 id="org7bfeeab">Logic (<code>types</code>)</h3>
-<div class="outline-text-3" id="text-org7bfeeab">
+<section id="slide-orga915c23">
+<h3 id="orga915c23">Logic (<code>types</code>)</h3>
+<div class="outline-text-3" id="text-orga915c23">
 </div>
 </section>
-<section id="slide-org044d33b">
-<h4 id="org044d33b">Game</h4>
+<section id="slide-org9d08683">
+<h4 id="org9d08683">Game</h4>
 <div class="org-src-container">
 
 <pre   ><code class="go" >type Game struct {
@@ -323,8 +323,8 @@ Given a parsed <code>game</code> data, extract the players of that match.
 </code></pre>
 </div>
 </section>
-<section id="slide-orgcf4ef46">
-<h4 id="orgcf4ef46">Player</h4>
+<section id="slide-org56146fb">
+<h4 id="org56146fb">Player</h4>
 <div class="org-src-container">
 
 <pre   ><code class="go" >type Player struct {
@@ -339,8 +339,8 @@ type Ways map[string]int
 </code></pre>
 </div>
 </section>
-<section id="slide-orgd24eefd">
-<h4 id="orgd24eefd">Encoded Game (easy outputting)</h4>
+<section id="slide-org977e382">
+<h4 id="org977e382">Encoded Game (easy outputting)</h4>
 <div class="org-src-container">
 
 <pre   ><code class="go" >type EncodeGame struct {
@@ -353,8 +353,8 @@ type Kills map[string]Kill
 </code></pre>
 </div>
 </section>
-<section id="slide-org4b95edd">
-<h4 id="org4b95edd">Ranking</h4>
+<section id="slide-orgb15c631">
+<h4 id="orgb15c631">Ranking</h4>
 <div class="org-src-container">
 
 <pre   ><code class="go" >type Rank struct {
@@ -367,13 +367,13 @@ type GameRank map[Name]*Rank
 </code></pre>
 </div>
 </section>
-<section id="slide-org8454285">
-<h3 id="org8454285">Methods</h3>
-<div class="outline-text-3" id="text-org8454285">
+<section id="slide-org8ca8e9e">
+<h3 id="org8ca8e9e">Methods</h3>
+<div class="outline-text-3" id="text-org8ca8e9e">
 </div>
 </section>
-<section id="slide-org045e023">
-<h4 id="org045e023">&ldquo;<code>Encoding</code>&rdquo;</h4>
+<section id="slide-org60b7cac">
+<h4 id="org60b7cac">&ldquo;<code>Encoding</code>&rdquo;</h4>
 <p>
 Consider the <i>boundary rules</i> or <i>business logic</i> for <b>Report</b> functionality.
 </p>
@@ -418,8 +418,8 @@ func (g *Game) NewEncodeGame() *EncodeGame {
 </code></pre>
 </div>
 </section>
-<section id="slide-orgcebdb12">
-<h4 id="orgcebdb12">Count player&rsquo;s kills</h4>
+<section id="slide-org437debf">
+<h4 id="org437debf">Count player&rsquo;s kills</h4>
 <div class="org-src-container">
 
 <pre   ><code class="go" >func (g *Game) countKills(name string) Kill {
@@ -435,8 +435,8 @@ func (g *Game) NewEncodeGame() *EncodeGame {
 </code></pre>
 </div>
 </section>
-<section id="slide-orgc9160d0">
-<h4 id="orgc9160d0">Rank Players, by Kill Count</h4>
+<section id="slide-org87ebe50">
+<h4 id="org87ebe50">Rank Players, by Kill Count</h4>
 <div class="org-src-container">
 
 <pre   ><code class="go" >func (g *EncodeGame) RankPlayersByKills() (*GameRank, []*Rank) {
@@ -463,8 +463,8 @@ func (g *Game) NewEncodeGame() *EncodeGame {
 </code></pre>
 </div>
 </section>
-<section id="slide-orgc4fde35">
-<h4 id="orgc4fde35">Count the total kills of a given type</h4>
+<section id="slide-orgffb7221">
+<h4 id="orgffb7221">Count the total kills of a given type</h4>
 <div class="org-src-container">
 
 <pre   ><code class="go" >func (g *Game) CountTypeKills() p.Ways {
@@ -489,14 +489,14 @@ func (g *Game) NewEncodeGame() *EncodeGame {
 </section>
 </section>
 <section>
-<section id="slide-orgc93a7a7">
-<h2 id="orgc93a7a7"><code>Output</code> and formatting</h2>
+<section id="slide-orge688acc">
+<h2 id="orge688acc"><code>Output</code> and formatting</h2>
 <p>
 <code>/game/output.go</code>
 </p>
 </section>
-<section id="slide-org06feb82">
-<h3 id="org06feb82">Formatting</h3>
+<section id="slide-org188ab8e">
+<h3 id="org188ab8e">Formatting</h3>
 <div class="org-src-container">
 
 <pre   ><code class="go" >func PrettyString(str string) (string, error) {
@@ -511,13 +511,13 @@ func (g *Game) NewEncodeGame() *EncodeGame {
 </section>
 </section>
 <section>
-<section id="slide-org9ac2a31">
-<h2 id="org9ac2a31">About me&#x2026;</h2>
-<div class="outline-text-2" id="text-org9ac2a31">
+<section id="slide-org65c252d">
+<h2 id="org65c252d">About me&#x2026;</h2>
+<div class="outline-text-2" id="text-org65c252d">
 </div>
 </section>
-<section id="slide-orgca50e6a">
-<h3 id="orgca50e6a">Languages I speak </h3>
+<section id="slide-org054a88e">
+<h3 id="org054a88e">Languages I speak </h3>
 <ul>
 <li class="fragment appear">Portuguese 🇧🇷 &#x2013; Native</li>
 <li class="fragment appear">English 🇺🇸    &#x2013; C2    (Maximum-range score)</li>
@@ -528,23 +528,27 @@ func (g *Game) NewEncodeGame() *EncodeGame {
 </section>
 </section>
 <section>
-<section id="slide-org9971299">
-<h2 id="org9971299">Jobs</h2>
-<div class="outline-text-2" id="text-org9971299">
+<section id="slide-org0a908e3">
+<h2 id="org0a908e3">Jobs</h2>
+<div class="outline-text-2" id="text-org0a908e3">
 </div>
 </section>
-<section id="slide-orgc8a45aa">
-<h4 id="orgc8a45aa">FACTI - Campinas, SP</h4>
+<section id="slide-org3b06f59">
+<h3 id="org3b06f59">FACTI - Campinas, SP</h3>
 <p>
 <code>Fundação de Apoio à Capacitação de Tecnologia da Informação</code>
 </p>
-<ul class="org-ul">
-<li><a id="orge2aa0ba"></a>Help desk app (a week)<br /></li>
-<li><a id="orgaea6ed7"></a>Fast PDFs with a lot of banking data<br /></li>
-</ul>
 </section>
-<section id="slide-org7783cfc">
-<h4 id="org7783cfc">Café do Bem (NPO)</h4>
+<section id="slide-org8a0fd2c" class="title__alien--class" data-state="title__alien--state" data-background-iframe="https://buddhilw.github.io/support-app/" data-background-interactive>
+<div style="background: rgb(250,250,250); opacity: 0.90; ">
+<h4 id="org8a0fd2c">Help desk app (a week)</h4>
+</div>
+</section>
+<section id="slide-orgcb7abca">
+<h4 id="orgcb7abca">Fast PDFs with a lot of banking data</h4>
+</section>
+<section id="slide-org052e3a1">
+<h3 id="org052e3a1">Café do Bem (NPO)</h3>
 <ul>
 <li class="fragment appear">High quality coffee.</li>
 <li class="fragment appear">The gains returns to coffee producers.</li>
@@ -552,31 +556,35 @@ func (g *Game) NewEncodeGame() *EncodeGame {
 <li class="fragment appear"><a href="https://cafe-do-bem.company.site/">https://cafe-do-bem.company.site/</a></li>
 
 </ul>
-<ul class="org-ul">
-<li><a id="org7511516"></a>The website<br />
-<div id="org17f6be6" class="figure">
+</section>
+<section id="slide-orgbccf36e">
+<h4 id="orgbccf36e">The website</h4>
+
+<div id="orgaec8f68" class="figure">
 <p><a href="img/cafe-do-bem.png" width="1200px"><img src="img/cafe-do-bem.png" alt="cafe-do-bem.png" width="1200px" /></a>
 </p>
 </div>
-</li>
-</ul>
 </section>
-<section id="slide-org4f6977d">
-<h4 id="org4f6977d">As a Contractor</h4>
-<div class="outline-text-4" id="text-org4f6977d">
+<section id="slide-org9080932">
+<h3 id="org9080932">As a Contractor</h3>
+<div class="outline-text-3" id="text-org9080932">
+</div>
+</section>
+<section id="slide-org16622c2">
+<h4 id="org16622c2">Advanced statistical analysis of Bidding prices</h4>
+<div class="outline-text-4" id="text-org16622c2">
 </div>
 <ul class="org-ul">
-<li><a id="orgbf5f801"></a>Advanced statistical analysis of Bidding prices<br />
-<ul class="org-ul">
-<li><a id="orgfbd8695"></a>Grouping in Categories<br />
-<div id="orgc946a6c" class="figure">
+<li><a id="org9b4a0ba"></a>Grouping in Categories<br />
+<div id="orgb4fd023" class="figure">
 <p><a href="img/rplot.png" width="1200px"><img src="img/rplot.png" alt="rplot.png" width="1200px" /></a>
 </p>
 </div>
 </li>
 </ul>
-</li>
-<li><a id="org8be4429"></a>Data converter XML to CSV<br />
+</section>
+<section id="slide-orgd35c0f4">
+<h4 id="orgd35c0f4">Data converter XML to CSV</h4>
 <div class="org-src-container">
 
 <pre   ><code class="xml" >&lt;?xml version='1.0' encoding='utf-8'?&gt;
@@ -601,8 +609,9 @@ func (g *Game) NewEncodeGame() *EncodeGame {
 &lt;/ns3:Servico&gt;
 </code></pre>
 </div>
-</li>
-<li><a id="orge1bcf30"></a>Data converter XML to CSV<br />
+</section>
+<section id="slide-org5bfe30e">
+<h4 id="org5bfe30e">Data converter XML to CSV</h4>
 <ul>
 <li>2409 instances of data.</li>
 
@@ -613,8 +622,9 @@ func (g *Game) NewEncodeGame() *EncodeGame {
 2018-01-05T10:32:20, FUNERARIA FRANCANA LTDA, RITA APARECIDA PEREIRA DA SILVA, 19636387869, 456.48, 3600.0
 </code></pre>
 </div>
-</li>
-<li><a id="org85960e8"></a>Data converter XML to CSV<br />
+</section>
+<section id="slide-org624975a">
+<h4 id="org624975a">Data converter XML to CSV</h4>
 <div class="org-src-container">
 
 <pre   ><code class="clojure" >(defn -&gt;row-csv
@@ -634,8 +644,9 @@ func (g *Game) NewEncodeGame() *EncodeGame {
         (str "\n"))))
 </code></pre>
 </div>
-</li>
-<li><a id="org5e0578a"></a>Data converter XML to CSV<br />
+</section>
+<section id="slide-orga4f5b51">
+<h4 id="orga4f5b51">Data converter XML to CSV</h4>
 <div class="org-src-container">
 
 <pre   ><code class="clojure" >(defn tributos [data]
@@ -651,8 +662,9 @@ func (g *Game) NewEncodeGame() *EncodeGame {
       parse-trib-val))
 </code></pre>
 </div>
-</li>
-<li><a id="org561d060"></a>Data converter XML to CSV<br />
+</section>
+<section id="slide-orgc1c5318">
+<h4 id="orgc1c5318">Data converter XML to CSV</h4>
 <div class="org-src-container">
 
 <pre   ><code class="clojure" >(h/tributos (first data))
@@ -661,38 +673,47 @@ func (g *Game) NewEncodeGame() *EncodeGame {
 <pre class="example">
 =&gt; 456.48
 </pre>
-</li>
-<li><a id="org469142f"></a>Analysis of Growth<br />
-<div id="orgffd2635" class="figure">
+</section>
+<section id="slide-org9ac7864">
+<h4 id="org9ac7864">Analysis of Growth</h4>
+
+<div id="org5722760" class="figure">
 <p><img src="img/Arrecadamento.png" alt="Arrecadamento.png" width="1000px" />
 </p>
 </div>
-</li>
-<li><a id="orgf5d0406"></a>Analysis of <code>Tax</code> and <code>Revenues</code><br />
-<div id="org7cefb2f" class="figure">
+</section>
+<section id="slide-org9579a80">
+<h4 id="org9579a80">Analysis of <code>Tax</code> and <code>Revenues</code></h4>
+
+<div id="org00595e6" class="figure">
 <p><img src="img/Dist-serv.png" alt="Dist-serv.png" width="1000px" />
 </p>
 </div>
-</li>
-<li><a id="org1c37139"></a>Analysis of <code>Tax</code> and <code>Revenues</code><br />
-<div id="orgc9977d9" class="figure">
+</section>
+<section id="slide-org2e90164">
+<h4 id="org2e90164">Analysis of <code>Tax</code> and <code>Revenues</code></h4>
+
+<div id="orgea4e4ae" class="figure">
 <p><img src="img/Serv-z.png" alt="Serv-z.png" width="1000px" />
 </p>
 </div>
-</li>
-<li><a id="org1181282"></a>Analysis of <code>Tax</code> and <code>Revenues</code><br />
-<div id="org41c253d" class="figure">
+</section>
+<section id="slide-orge2d67b7">
+<h4 id="orge2d67b7">Analysis of <code>Tax</code> and <code>Revenues</code></h4>
+
+<div id="org567d6d4" class="figure">
 <p><img src="img/Dist-trib.png" alt="Dist-trib.png" width="1000px" />
 </p>
 </div>
-</li>
-<li><a id="org1f41081"></a>Find and explain abnormalities in <code>Revenue</code><br />
+</section>
+<section id="slide-org5866323">
+<h4 id="org5866323">Find and explain abnormalities in <code>Revenue</code></h4>
 <div class="org-src-container">
 
 <pre   ><code class="julia" >subset(df_mmz, :Serv_z =&gt; ByRow(&lt;(-1.5)))
 </code></pre>
 </div>
-<pre class="example" id="org01d8285">
+<pre class="example" id="orgb728a0c">
 8×6 DataFrame
  Row │ Data_function  Tributos_sum  ValorServico_sum  id     Trib_z    Serv_z
      │ Tuple…         Float64       Float64           Int64  Float64   Float64
@@ -706,8 +727,9 @@ func (g *Game) NewEncodeGame() *EncodeGame {
    7 │ (2018, 12)         11934.2            89160.0     12  -1.58526  -1.7358
    8 │ (2019, 6)           9095.84           69021.4     18  -2.10034  -2.35555
 </pre>
-</li>
-<li><a id="org0ae4474"></a>Correlation between <code>Tax</code> and <code>Income</code><br />
+</section>
+<section id="slide-org3bacc44">
+<h4 id="org3bacc44">Correlation between <code>Tax</code> and <code>Income</code></h4>
 <div class="org-src-container">
 
 <pre   ><code class="julia" >cor(df_mm.Tributos_sum, df_mm.ValorServico_sum)
@@ -716,8 +738,9 @@ func (g *Game) NewEncodeGame() *EncodeGame {
 <pre class="example">
 89.12%
 </pre>
-</li>
-<li><a id="org9af6947"></a>Hypothesis test data on equal variation<br />
+</section>
+<section id="slide-org63ed17a">
+<h4 id="org63ed17a">Hypothesis test data on equal variation</h4>
 <ul>
 <li>Julia interoperation with R.</li>
 
@@ -730,17 +753,15 @@ R"var.test($trib_z, y = $val_serv_z)"
 </code></pre>
 </div>
 
-<pre class="example" id="org588b002">
+<pre class="example" id="orgd79fd14">
         F test to compare two variances
 
 data:  `#JL`$trib_z and `#JL`$val_serv_z
 F = 1, num df = 56, denom df = 56, p-value = 1
 </pre>
-</li>
-</ul>
 </section>
-<section id="slide-org0d14397">
-<h4 id="org0d14397">Flow Finance</h4>
+<section id="slide-org875a8f2">
+<h3 id="org875a8f2">Flow Finance</h3>
 <ul>
 <li class="fragment appear">Clarence and Leadger</li>
 <li class="fragment appear">Automate billing</li>
@@ -749,8 +770,9 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 <li class="fragment appear">Code: <a href="https://github.com/BuddhiLW/commons-csv-clj">https://github.com/BuddhiLW/commons-csv-clj</a></li>
 
 </ul>
-<ul class="org-ul">
-<li><a id="org9f79fb4"></a>Example<br />
+</section>
+<section id="slide-org998ff14">
+<h4 id="org998ff14">Example</h4>
 <div class="org-src-container">
 
 <pre   ><code class="clojure" >(defn cnpj#
@@ -765,17 +787,17 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 <pre   ><code class="clojure" >(cnpj# "17194123000103" vec-revenues)
 </code></pre>
 </div>
-</li>
-<li><a id="orgd6c2c07"></a>Literate documentation<br />
-<div id="org5018836" class="figure">
+</section>
+<section id="slide-org15dd24e">
+<h4 id="org15dd24e">Literate documentation</h4>
+
+<div id="orgf7179f5" class="figure">
 <p><a href="img/FlowFinance.png" width="1200px"><img src="img/FlowFinance.png" alt="FlowFinance.png" width="1200px" /></a>
 </p>
 </div>
-</li>
-</ul>
 </section>
-<section id="slide-org948d28f">
-<h4 id="org948d28f">Lupo S.A.</h4>
+<section id="slide-org0e21dbb">
+<h3 id="org0e21dbb">Lupo S.A.</h3>
 <ul>
 <li class="fragment appear">Technical Report Automation.</li>
 <li class="fragment appear">Inventory of 300+ machines.</li>
@@ -783,45 +805,47 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 <li class="fragment appear">Code: <a href="https://github.com/BuddhiLW/CloshBashika">https://github.com/BuddhiLW/CloshBashika</a></li>
 
 </ul>
-<ul class="org-ul">
-<li><a id="org1e32545"></a>Example<br />
-<div id="orgdbc267e" class="figure">
+</section>
+<section id="slide-org56364f0">
+<h4 id="org56364f0">Example</h4>
+
+<div id="org72820b1" class="figure">
 <p><a href="img/lupo.jpg" width="1200px"><img src="img/lupo.jpg" alt="lupo.jpg" width="1200px" /></a>
 </p>
 </div>
-</li>
-<li><a id="org7b36419"></a>Freelance with a group of Safety Engineers<br />
-<div id="org46aa64f" class="figure">
+</section>
+<section id="slide-orgcad1805">
+<h4 id="orgcad1805">Freelance with a group of Safety Engineers</h4>
+
+<div id="org0b4623e" class="figure">
 <p><img src="img/lupo2.jpeg" alt="lupo2.jpeg" width="1000px" />
 </p>
 </div>
-</li>
-</ul>
 </section>
 </section>
 <section>
-<section id="slide-org69b950f">
-<h2 id="org69b950f">Projects</h2>
-<div class="outline-text-2" id="text-org69b950f">
+<section id="slide-orge3dba9a">
+<h2 id="orge3dba9a">Projects</h2>
+<div class="outline-text-2" id="text-orge3dba9a">
 </div>
 </section>
-<section id="slide-org53679a1" class="title__cards" data-background-iframe="https://buddhilw.github.io/Instagram-replica/" data-background-interactive>
+<section id="slide-org3f347b0" class="title__cards" data-background-iframe="https://buddhilw.github.io/Instagram-replica/" data-background-interactive>
 <div style="background: rgb(250,250,250); opacity: 0.90; ">
-<h4 id="org53679a1">HTML/CSS &#x2013; Instagram Replica</h4>
+<h3 id="org3f347b0">HTML/CSS &#x2013; Instagram Replica</h3>
 </div>
 </section>
-<section id="slide-org2bb798b" class="title__cards" data-background-iframe="https://buddhilw.github.io/MatchingCards/" data-background-interactive>
+<section id="slide-orga7f2817" class="title__cards" data-background-iframe="https://buddhilw.github.io/MatchingCards/" data-background-interactive>
 <div style="background: rgb(250,250,250); opacity: 0.90; ">
-<h4 id="org2bb798b">JS/Elm &#x2013; Matching Cards game</h4>
+<h3 id="orga7f2817">JS/Elm &#x2013; Matching Cards game</h3>
 </div>
 </section>
-<section id="slide-org26b1180" class="title__cards" data-background-iframe="https://www.buddhilw.com/" data-background-interactive>
+<section id="slide-org3a2831b" class="title__cards" data-background-iframe="https://www.buddhilw.com/" data-background-interactive>
 <div style="background: rgb(250,250,250); opacity: 0.90; ">
-<h4 id="org26b1180">Clojure(Script) &#x2013; Personal Website</h4>
+<h3 id="org3a2831b">Clojure(Script) &#x2013; Personal Website</h3>
 </div>
 </section>
-<section id="slide-org5f68937">
-<h4 id="org5f68937">Clojure(Script) &#x2013; Giggin</h4>
+<section id="slide-orgb513963">
+<h3 id="orgb513963">Clojure(Script) &#x2013; Giggin</h3>
 <ul>
 <li>Not yet deployed.</li>
 <li>Shopping site.</li>
@@ -829,22 +853,23 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 </ul>
 
 
-<div id="org27e031a" class="figure">
+<div id="org6ac83f6" class="figure">
 <p><a href="img/img-giggin.png" width="600px"><img src="./img/img-giggin.png" alt="img-giggin.png" width="600px" /></a>
 </p>
 </div>
 </section>
-<section id="slide-org814b2b0" class="title__cards" data-background-iframe="https://buddhilw.github.io/bug-free-fiesta/" data-background-interactive>
+<section id="slide-org7102ac7" class="title__cards" data-background-iframe="https://buddhilw.github.io/bug-free-fiesta/" data-background-interactive>
 <div style="background: rgb(250,250,250); opacity: 0.90; ">
-<h4 id="org814b2b0">Clojure(Script) &#x2013; Certifications Portfolio</h4>
+<h3 id="org7102ac7">Clojure(Script) &#x2013; Certifications Portfolio</h3>
 </div>
 </section>
-<section id="slide-org8d77e1f">
-<h4 id="org8d77e1f">System&rsquo;s functionalities</h4>
-<div class="outline-text-4" id="text-org8d77e1f">
+<section id="slide-org496f474">
+<h3 id="org496f474">System&rsquo;s functionalities</h3>
+<div class="outline-text-3" id="text-org496f474">
 </div>
-<ul class="org-ul">
-<li><a id="org617f6d3"></a>Pomodoro &#x2013; Go/Bash<br />
+</section>
+<section id="slide-org3d212bd">
+<h4 id="org3d212bd">Pomodoro &#x2013; Go/Bash</h4>
 <ul>
 <li>Self-management.</li>
 <li>Data collection.</li>
@@ -853,12 +878,13 @@ F = 1, num df = 56, denom df = 56, p-value = 1
 </ul>
 
 
-<div id="org32eac00" class="figure">
+<div id="org4605da6" class="figure">
 <p><a href="img/pomo.png" width="500px"><img src="./img/pomo.png" alt="pomo.png" width="500px" /></a>
 </p>
 </div>
-</li>
-<li><a id="org2feb6f2"></a>Note-taking (Diary) &#x2013; Elisp/Emacs<br />
+</section>
+<section id="slide-org44a5149">
+<h4 id="org44a5149">Note-taking (Diary) &#x2013; Elisp/Emacs</h4>
 <ul>
 <li>Take notes, whitout the need to thing too much.</li>
 <li>Bind it to three key-strokes.</li>
@@ -878,17 +904,17 @@ F = 1, num df = 56, denom df = 56, p-value = 1
     (find-file (lw/diary-day-entry))))
 </code></pre>
 </div>
-</li>
-<li><a id="org3967852"></a>Note-taking (Diary) &#x2013; Elisp/Emacs<br />
-<div id="org8380f3e" class="figure">
+</section>
+<section id="slide-org84ff847">
+<h4 id="org84ff847">Note-taking (Diary) &#x2013; Elisp/Emacs</h4>
+
+<div id="org61d6c8e" class="figure">
 <p><a href="img/diary.png" width="600px"><img src="./img/diary.png" alt="diary.png" width="600px" /></a>
 </p>
 </div>
-</li>
-</ul>
 </section>
-<section id="slide-orgddfb48d">
-<h4 id="orgddfb48d">Trading Bot</h4>
+<section id="slide-orgf7b9ffe">
+<h3 id="orgf7b9ffe">Trading Bot</h3>
 <p>
 Code (FOSS):
 </p>
@@ -899,14 +925,15 @@ Code (FOSS):
 
 </ul>
 </section>
-<section id="slide-orgeb79d59">
-<h4 id="orgeb79d59">API Integration to Stark Bank</h4>
+<section id="slide-org965438d">
+<h3 id="org965438d">API Integration to Stark Bank</h3>
 <ul>
 <li>Access: <a href="https://github.com/BuddhiLW/stark-challenge">https://github.com/BuddhiLW/stark-challenge</a></li>
 
 </ul>
-<ul class="org-ul">
-<li><a id="orgc6dc37f"></a>Main tasks - Invoice generation<br />
+</section>
+<section id="slide-org6b0bae8">
+<h4 id="org6b0bae8">Main tasks - Invoice generation</h4>
 <p>
 Generate <code>Invoice</code> payment bills.
 </p>
@@ -923,24 +950,23 @@ Generate <code>Invoice</code> payment bills.
                   help/descr-ex)])
 </code></pre>
 </div>
-</li>
-<li><a id="org353ba05"></a>Server-side Webhook responses<br />
+</section>
+<section id="slide-org5ba1788">
+<h4 id="org5ba1788">Server-side Webhook responses</h4>
 <ul>
 <li>Deal with <code>POST</code> requests, from Webhook.</li>
 <li>Responses from Invoice Generation</li>
 
 </ul>
 
-<div id="org5bdf7a9" class="figure">
+<div id="org5392b1c" class="figure">
 <p><a href="img/request-bin.png" width="600px"><img src="img/request-bin.png" alt="request-bin.png" width="600px" /></a>
 </p>
 </div>
-</li>
-</ul>
 </section>
-<section id="slide-orga5d5e8a" class="title__alien--class" data-state="title__alien--state" data-background-iframe="https://www.youtube.com/channel/UCcDTD0VMlN2tGA7sDVZllRw" data-background-interactive>
+<section id="slide-org6f21010" class="title__alien--class" data-state="title__alien--state" data-background-iframe="https://www.youtube.com/channel/UCcDTD0VMlN2tGA7sDVZllRw" data-background-interactive>
 <div style="background: rgb(250,250,250); opacity: 0.90; ">
-<h4 id="orga5d5e8a">Application walkthrough</h4>
+<h3 id="org6f21010">Application walkthrough</h3>
 </div>
 </section>
 </section>
